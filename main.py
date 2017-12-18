@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -25,6 +25,13 @@ class User(db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('user_role.id'), nullable=False)
     role = db.relationship("UserRole", back_populates="user")
     bookings = db.relationship('Booking', back_populates='creator', lazy=True)
+
+    def json(self):
+        return {
+            "id" : self.id,
+            "name" : self.name,
+            "role" : self.role.name
+        }
 
 booking_tables = db.Table('booking_tables',
     db.Column('table_id', db.Integer, db.ForeignKey('table.id'), primary_key=True),
@@ -53,7 +60,7 @@ if app.config["ADD_INITIAL_DATA"] == True:
     file = "./database/restaurant.db"
     database_exists = os.path.isfile(file)
     if database_exists:
-        os.remove(file) 
+        os.remove(file)
 
     db.create_all()
     print "Database models created."
@@ -87,9 +94,18 @@ if app.config["ADD_INITIAL_DATA"] == True:
     db.session.commit()
     print "Init data created in database"
 
+
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
+
+@app.route('/users')
+def get_users():
+    users = User.query.all()
+    usersJSON = []
+    for user in users:
+        usersJSON.append(user.json())
+    return jsonify({'users': usersJSON})
 
 
 if __name__ == '__main__':

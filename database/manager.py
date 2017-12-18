@@ -1,10 +1,9 @@
 from datetime import datetime
-from database.models import *
 
 """
     Database controller class.
 """
-class DatabaseController():
+class DatabaseManager():
     def __init__(self, db):
         self.db = db
 
