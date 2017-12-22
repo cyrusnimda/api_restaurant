@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -43,6 +43,13 @@ class Table(db.Model):
     desc = db.Column(db.String(200))
     seats = db.Column(db.Integer)
 
+    def json(self):
+        return {
+            "id" : self.id,
+            "desc": self.desc,
+            "seats" : self.seats
+        }
+
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     booked_at = db.Column(db.DateTime)
@@ -51,6 +58,21 @@ class Booking(db.Model):
     booked_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     creator = db.relationship("User", back_populates="bookings")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def json(self):
+        jsonBooking = {
+            "id" : self.id,
+            "booked_at" : self.booked_at.strftime('%Y-%m-%d %H:%M'),
+            "persons" : self.persons,
+            "created_at" : self.created_at.strftime('%Y-%m-%d %H:%M'),
+            "creator": self.creator.json()
+        }
+        tablesArray = []
+        for table in self.tables:
+            tablesArray.append(table.json())
+        jsonBooking["tables"] = tablesArray
+
+        return jsonBooking
 
 #Load init data in database
 if app.config["ADD_INITIAL_DATA"] == True:
@@ -106,6 +128,19 @@ def get_users():
     for user in users:
         usersJSON.append(user.json())
     return jsonify({'users': usersJSON})
+
+@app.route('/bookings')
+def get_bookings():
+    bookingDate = request.args.get('date')
+    if bookingDate is None:
+        bookingDate = datetime.now().strftime('%Y-%m-%d')
+
+    bookings = Booking.query.filter(Booking.booked_at.startswith(bookingDate)).all()
+    bookingsJSON = []
+    for booking in bookings:
+        bookingsJSON.append(booking.json())
+
+    return jsonify({'date': bookingDate,'bookings': bookingsJSON})
 
 
 if __name__ == '__main__':
