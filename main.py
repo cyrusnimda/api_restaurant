@@ -25,19 +25,17 @@ def get_users():
 
 @app.route('/booking')
 def get_bookings():
-    bookingDate = request.args.get('date')
-    if bookingDate is None:
-        bookingDate = datetime.now().strftime('%Y-%m-%d')
+    bookingDateStr = request.args.get('date')
+    if bookingDateStr is None:
+        bookingDate = datetime.now()
     else:
         # validate date
         try:
-            datetime.strptime(bookingDate, "%Y-%m-%d")
+            bookingDate = datetime.strptime(bookingDateStr, "%Y-%m-%d")
         except:
-            return jsonify({'message': "Date format is incorrect, try YYYY-mm-dd."}), 301
-    # get booking rate for requested date
-    totalTables = Table.query.count()
+            return jsonify({'message': "Date is not valid (YYYY-mm-dd)."}), 301
 
-    bookings = Booking.query.filter(Booking.booked_at.startswith(bookingDate)).all()
+    bookings = Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime('%Y-%m-%d') )).all()
     bookingsJSON = []
     bookedTables = 0
     for booking in bookings:
@@ -46,9 +44,9 @@ def get_bookings():
 
     return jsonify(
         {
-            'date': bookingDate,
+            'date': bookingDate.strftime('%Y-%m-%d'),
             'bookings': bookingsJSON,
-            'totalTables': totalTables,
+            'totalTables': Table.query.count(),
             'bookedTables': bookedTables
         }
     )
