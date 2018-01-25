@@ -12,8 +12,8 @@ print "Config file loaded."
 db.init_app(app)
 
 @app.route('/')
-def hello_world():
-    return 'Hello, World!'
+def index():
+    return jsonify({'message': "Wellcome to restaurant API."})
 
 @app.route('/users')
 def get_users():
@@ -28,7 +28,12 @@ def get_bookings():
     bookingDate = request.args.get('date')
     if bookingDate is None:
         bookingDate = datetime.now().strftime('%Y-%m-%d')
-
+    else:
+        # validate date
+        try:
+            datetime.strptime(bookingDate, "%Y-%m-%d")
+        except:
+            return jsonify({'message': "Date format is incorrect, try YYYY-mm-dd."}), 301
     # get booking rate for requested date
     totalTables = Table.query.count()
 
