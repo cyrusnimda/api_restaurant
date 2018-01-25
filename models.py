@@ -1,19 +1,13 @@
-#!/usr/bin/env python
-
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
-app = Flask(__name__)
-db = SQLAlchemy(app)
-
-app.config['SECRET_KEY'] = 'thisissecret'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:ARMUmysqlr00t@127.0.0.1/restaurant'
+db = SQLAlchemy()
 
 class UserRole(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True)
     desc = db.Column(db.String(200))
-    users = db.relationship('Booking', backref='role', lazy=True)
+    user = db.relationship("User", back_populates="role")
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -21,7 +15,15 @@ class User(db.Model):
     password = db.Column(db.String(80))
     token = db.Column(db.String(80))
     role_id = db.Column(db.Integer, db.ForeignKey('user_role.id'), nullable=False)
-    bookings = db.relationship('Booking', backref='creator', lazy=True)
+    role = db.relationship("UserRole", back_populates="user")
+    bookings = db.relationship('Booking', back_populates='creator', lazy=True)
+
+    def json(self):
+        return {
+            "id" : self.id,
+            "name" : self.name,
+            "role" : self.role.name
+        }
 
 booking_tables = db.Table('booking_tables',
     db.Column('table_id', db.Integer, db.ForeignKey('table.id'), primary_key=True),
@@ -35,8 +37,9 @@ class Table(db.Model):
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    datetime = db.Column(db.DateTime)
+    booked_at = db.Column(db.DateTime)
     tables = db.relationship('Table', secondary=booking_tables, lazy='subquery')
     persons = db.Column(db.Integer)
     booked_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    created_at = db.Column(db.DateTime)
+    creator = db.relationship("User", back_populates="bookings")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
