@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from datetime import datetime
 from models import db, UserRole, User, Table, Booking
 
@@ -9,6 +9,10 @@ app.config.from_pyfile('config.cfg')
 
 # Load database model
 db.init_app(app)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return jsonify({'message': 'Object not found.'}), 404
 
 @app.route('/')
 def index():
@@ -22,7 +26,20 @@ def get_users():
         usersJSON.append(user.json())
     return jsonify({'users': usersJSON})
 
-@app.route('/booking')
+@app.route('/tables')
+def get_tables():
+    tables = Table.query.all()
+    tablesJSON = []
+    for table in tables:
+        tablesJSON.append(table.json())
+    return jsonify({'tables': tablesJSON})
+
+@app.route('/tables/<int:table_id>')
+def get_table_id(table_id):
+    table = Table.query.get(table_id)
+    return jsonify({'table': table.json()})
+
+@app.route('/bookings')
 def get_bookings():
     bookingDateStr = request.args.get('date')
     dateFormat = "%Y-%m-%d %H:%M"
