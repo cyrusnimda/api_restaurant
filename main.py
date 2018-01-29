@@ -6,7 +6,6 @@ app = Flask(__name__)
 
 # Load config file
 app.config.from_pyfile('config.cfg')
-print "Config file loaded."
 
 # Load database model
 db.init_app(app)
@@ -26,16 +25,22 @@ def get_users():
 @app.route('/booking')
 def get_bookings():
     bookingDateStr = request.args.get('date')
+    dateFormat = "%Y-%m-%d %H:%M"
+
     if bookingDateStr is None:
         bookingDate = datetime.now()
+        bookingDate = bookingDate.replace(hour=20, minute=00)
     else:
-        # validate date
         try:
-            bookingDate = datetime.strptime(bookingDateStr, "%Y-%m-%d")
+            bookingDate = datetime.strptime(bookingDateStr, dateFormat)
         except:
-            return jsonify({'message': "Date is not valid (YYYY-mm-dd)."}), 301
+            return jsonify({'message': "Date is not valid (YYYY-mm-dd hh:mm)."}), 301
+        # We only accept bookings from oclock or half hours.
+        hour = bookingDate.strftime("%M")
+        if(hour not in ["00", "30"]):
+            return jsonify({'message': "Bookings are accepted only from o'clock or half hours"}), 301
 
-    bookings = Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime('%Y-%m-%d') )).all()
+    bookings = Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime(dateFormat) )).all()
     bookingsJSON = []
     bookedTables = 0
     for booking in bookings:
@@ -44,7 +49,7 @@ def get_bookings():
 
     return jsonify(
         {
-            'date': bookingDate.strftime('%Y-%m-%d'),
+            'date': bookingDate.strftime(dateFormat),
             'bookings': bookingsJSON,
             'totalTables': Table.query.count(),
             'bookedTables': bookedTables
