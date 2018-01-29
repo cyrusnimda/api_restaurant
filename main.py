@@ -51,11 +51,11 @@ def get_bookings():
         try:
             bookingDate = datetime.strptime(bookingDateStr, dateFormat)
         except:
-            return jsonify({'message': "Date is not valid (YYYY-mm-dd hh:mm)."}), 301
+            return jsonify({'message': "Date is not valid (YYYY-mm-dd hh:mm)."}), 400
         # We only accept bookings from oclock or half hours.
         hour = bookingDate.strftime("%M")
         if(hour not in ["00", "30"]):
-            return jsonify({'message': "Bookings are accepted only from o'clock or half hours"}), 301
+            return jsonify({'message': "Bookings are accepted only from o'clock or half hours"}), 400
 
     bookings = Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime(dateFormat) )).all()
     bookingsJSON = []

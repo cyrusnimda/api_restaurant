@@ -19,16 +19,16 @@ class BookingTests(unittest.TestCase):
 
     def test_incorrect_datetime(self):
         response = self.tester.get("/bookings?date=not_valid")
-        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response.status_code, 400)
 
         response = self.tester.get("/bookings?date=2018-1-1")
-        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response.status_code, 400)
 
         response = self.tester.get("/bookings?date=2018-1-1 12:12")
-        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response.status_code, 400)
 
         response = self.tester.get("/bookings?date=2018-1-1 12:12:00")
-        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response.status_code, 400)
 
 
 class TableTests(unittest.TestCase):
