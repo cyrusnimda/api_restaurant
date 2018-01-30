@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request
 from datetime import datetime
 from models import db, UserRole, User, Table, Booking
 
@@ -73,15 +73,31 @@ def get_bookings():
         }
     )
 
-@app.route('/booking', methods=['POST'])
+@app.route('/bookings', methods=['POST'])
 def create_booking():
     req_data = request.get_json(force=True)
     if not req_data:
-        return jsonify( { 'Error': 'No JSON found' } )
+        return jsonify( { 'message': 'No JSON found.' } ), 400
 
-    print req_data["persons"]
-    booking = Booking(creator=josu, persons=req_data["persons"], booked_at=req_data["booked_at"] )
-    error = booking.validate()
+    if "persons" not in req_data or "date" not in req_data:
+        return jsonify( { 'message': '"date" and "persons" are mandatory parameters.' } ), 400
+
+    if not (1 <= req_data["persons"] <= 20):
+        return jsonify( { 'message': 'We do not book for more than 20 persons.' } ), 400
+
+    dateFormat = "%Y-%m-%d %H:%M"
+    try:
+        bookingDate = datetime.strptime(req_data["date"], dateFormat)
+    except:
+        return jsonify({'message': "Date is not valid (YYYY-mm-dd hh:mm)."}), 400
+    # We only accept bookings from oclock or half hours.
+    hour = bookingDate.strftime("%M")
+    if(hour not in ["00", "30"]):
+        return jsonify({'message': "Bookings are accepted only from o'clock or half hours"}), 400
+
+    # print req_data["persons"]
+    # booking = Booking(creator=josu, persons=req_data["persons"], booked_at=req_data["booked_at"] )
+    # error = booking.validate()
 
 
     return jsonify( { 'status': 'OK' } )
