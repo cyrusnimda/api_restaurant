@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
-from datetime import datetime
+from datetime import datetime, timedelta
 from models import db, UserRole, User, Table, Booking
+from controllers import BookingController
 
 app = Flask(__name__)
 
@@ -36,7 +37,7 @@ def get_tables():
 
 @app.route('/tables/<int:table_id>')
 def get_table_id(table_id):
-    table = Table.query.get(table_id)
+    table = Table.query.get_or_404(table_id)
     return jsonify({'table': table.json()})
 
 @app.route('/bookings')
@@ -53,11 +54,12 @@ def get_bookings():
         except:
             return jsonify({'message': "Date is not valid (YYYY-mm-dd hh:mm)."}), 400
         # We only accept bookings from oclock or half hours.
-        hour = bookingDate.strftime("%M")
-        if(hour not in ["00", "30"]):
+        minutes = bookingDate.strftime("%M")
+        if(minutes not in ["00", "30"]):
             return jsonify({'message': "Bookings are accepted only from o'clock or half hours"}), 400
 
     bookings = Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime(dateFormat) )).all()
+
     bookingsJSON = []
     bookedTables = 0
     for booking in bookings:
@@ -82,7 +84,7 @@ def create_booking():
     if "persons" not in req_data or "date" not in req_data:
         return jsonify( { 'message': '"date" and "persons" are mandatory parameters.' } ), 400
 
-    if not (1 <= req_data["persons"] <= 20):
+    if not (1 <= int(req_data["persons"]) <= 20):
         return jsonify( { 'message': 'We do not book for more than 20 persons.' } ), 400
 
     dateFormat = "%Y-%m-%d %H:%M"
@@ -91,13 +93,25 @@ def create_booking():
     except:
         return jsonify({'message': "Date is not valid (YYYY-mm-dd hh:mm)."}), 400
     # We only accept bookings from oclock or half hours.
-    hour = bookingDate.strftime("%M")
-    if(hour not in ["00", "30"]):
+    minutes = bookingDate.strftime("%M")
+    if(minutes not in ["00", "30"]):
         return jsonify({'message': "Bookings are accepted only from o'clock or half hours"}), 400
 
-    # print req_data["persons"]
-    # booking = Booking(creator=josu, persons=req_data["persons"], booked_at=req_data["booked_at"] )
-    # error = booking.validate()
+    # Create the booking object, without tables.
+    josu = User.query.filter_by(name="josu").first()
+    booking = Booking(creator=josu, persons=req_data["persons"], booked_at=bookingDate )
+    bookingManager = BookingController()
+
+    # Get free tables
+    free_tables = bookingManager.get_free_tables(booking)
+
+    # Get bets tables for this booking.
+    best_tables = bookingManager.get_best_tables_for_a_booking(free_tables, booking)
+
+    # print best_tables
+    #
+    # print tables
+    # print bookings
 
 
     return jsonify( { 'status': 'OK' } )

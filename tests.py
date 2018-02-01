@@ -1,6 +1,11 @@
 from main import app
 import unittest
 import json
+from flask import Flask
+from models import db, Table, Booking, User
+from controllers import BookingController
+from datetime import datetime
+import copy
 
 class BookingTests(unittest.TestCase):
 
@@ -59,7 +64,7 @@ class BookingTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         data = {
-            'persons': 20,
+            'persons': '20',
             'date': '2018-01-30 17:00'
         }
         response = self.tester.post("/bookings",
@@ -107,6 +112,79 @@ class BookingTests(unittest.TestCase):
 
 
 
+class BookingControllerTests(unittest.TestCase):
+
+    def setUp(self):
+        self.tester = app.test_client(self)
+
+        # Creates a new database for the unit test to use
+        self.app = Flask(__name__)
+        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+        self.app.config['TESTING'] = True
+        db.init_app(self.app)
+        with self.app.app_context():
+            db.create_all()
+            self.populate_db()
+
+    def populate_db(self):
+        table1 = Table(desc='Table closest to front door', seats=4)
+        table2 = Table(desc='Table number 2', seats=2)
+        table3 = Table(desc='Circular table', seats=8)
+        table4 = Table(desc='Table number 4', seats=2)
+        table5 = Table(desc='Table number 5', seats=2)
+        table6 = Table(desc='Table number 6', seats=4)
+        table7 = Table(desc='Table number 7', seats=4)
+        table8 = Table(desc='Table number 8', seats=4)
+        table9 = Table(desc='Table number 9', seats=4)
+        table10 = Table(desc='Table number 10', seats=6)
+        with self.app.app_context():
+            db.session.add(table1)
+            db.session.add(table2)
+            db.session.add(table3)
+            db.session.add(table4)
+            db.session.add(table5)
+            db.session.add(table6)
+            db.session.add(table7)
+            db.session.add(table8)
+            db.session.add(table9)
+            db.session.add(table10)
+            db.session.commit()
+
+    def tearDown(self):
+        with self.app.app_context():
+            db.drop_all()
+
+    def test_get_best_tables(self):
+        with self.app.app_context():
+            tables = Table.query.order_by(Table.seats).all()
+            josu = User.query.filter_by(name="josu").first()
+        bookingManager = BookingController()
+
+        booking = Booking(creator=josu, persons=10, booked_at=datetime.strptime("2018-01-30 20:00", "%Y-%m-%d %H:%M") )
+        best_tables = bookingManager.get_best_tables_for_a_booking(copy.deepcopy(tables), booking)
+        self.assertEqual(len(best_tables), 2)
+        self.assertEqual( best_tables[0].id, 3)
+        self.assertEqual( best_tables[1].id, 2 )
+
+        booking = Booking(creator=josu, persons=3, booked_at=datetime.strptime("2018-01-30 20:00", "%Y-%m-%d %H:%M") )
+        best_tables = bookingManager.get_best_tables_for_a_booking(copy.deepcopy(tables), booking)
+        self.assertEqual(len(best_tables), 1)
+        self.assertEqual( best_tables[0].id, 1)
+
+        booking = Booking(creator=josu, persons=5, booked_at=datetime.strptime("2018-01-30 20:00", "%Y-%m-%d %H:%M") )
+        best_tables = bookingManager.get_best_tables_for_a_booking(copy.deepcopy(tables), booking)
+        self.assertEqual(len(best_tables), 1)
+        self.assertEqual( best_tables[0].id, 10)
+
+        booking = Booking(creator=josu, persons=20, booked_at=datetime.strptime("2018-01-30 20:00", "%Y-%m-%d %H:%M") )
+        best_tables = bookingManager.get_best_tables_for_a_booking(copy.deepcopy(tables), booking)
+        self.assertEqual(len(best_tables), 4)
+        self.assertEqual( best_tables[0].id, 3)
+        self.assertEqual( best_tables[1].id, 10)
+        self.assertEqual( best_tables[2].id, 9)
+        self.assertEqual( best_tables[3].id, 2)
+
 
 class TableTests(unittest.TestCase):
 
@@ -122,6 +200,9 @@ class TableTests(unittest.TestCase):
 
     def test_table_not_found(self):
         response = self.tester.get("/tables/a")
+        self.assertEqual(response.status_code, 404)
+
+        response = self.tester.get("/tables/999999")
         self.assertEqual(response.status_code, 404)
 
 if __name__ == '__main__':
