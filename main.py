@@ -43,14 +43,13 @@ def get_table_id(table_id):
 @app.route('/bookings')
 def get_bookings():
     bookingDateStr = request.args.get('date')
-    dateFormat = "%Y-%m-%d %H:%M"
 
     if bookingDateStr is None:
         bookingDate = datetime.now()
         bookingDate = bookingDate.replace(hour=20, minute=00)
     else:
         try:
-            bookingDate = datetime.strptime(bookingDateStr, dateFormat)
+            bookingDate = datetime.strptime(bookingDateStr, app.config["DATE_FORMAT"])
         except:
             return jsonify({'message': "Date is not valid (YYYY-mm-dd hh:mm)."}), 400
         # We only accept bookings from oclock or half hours.
@@ -58,7 +57,7 @@ def get_bookings():
         if(minutes not in ["00", "30"]):
             return jsonify({'message': "Bookings are accepted only from o'clock or half hours"}), 400
 
-    bookings = Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime(dateFormat) )).all()
+    bookings = Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime(app.config["DATE_FORMAT"]) )).all()
 
     bookingsJSON = []
     bookedTables = 0
@@ -68,38 +67,49 @@ def get_bookings():
 
     return jsonify(
         {
-            'date': bookingDate.strftime(dateFormat),
+            'date': bookingDate.strftime(app.config["DATE_FORMAT"]),
             'bookings': bookingsJSON,
             'totalTables': Table.query.count(),
             'bookedTables': bookedTables
         }
     )
 
+def check_mandatory_parameters(original_function):
+    def wrapper_function():
+        req_data = request.get_json(force=True)
+        if not req_data:
+            return jsonify( { 'message': 'No JSON found.' } ), 400
+
+        if "persons" not in req_data or "date" not in req_data:
+            return jsonify( { 'message': '"date" and "persons" are mandatory parameters.' } ), 400
+
+        if not (1 <= int(req_data["persons"]) <= 20):
+            return jsonify( { 'message': 'We do not book for more than 20 persons.' } ), 400
+
+        try:
+            bookingDate = datetime.strptime(req_data["date"], app.config["DATE_FORMAT"])
+        except:
+            return jsonify({'message': "Date is not valid (YYYY-mm-dd hh:mm)."}), 400
+
+        # We only accept bookings from oclock or half hours.
+        minutes = bookingDate.strftime("%M")
+        if(minutes not in ["00", "30"]):
+            return jsonify({'message': "Bookings are accepted only from o'clock or half hours"}), 400
+
+        return original_function()
+    return wrapper_function
+
+
 @app.route('/bookings', methods=['POST'])
+@check_mandatory_parameters
 def create_booking():
     req_data = request.get_json(force=True)
-    if not req_data:
-        return jsonify( { 'message': 'No JSON found.' } ), 400
-
-    if "persons" not in req_data or "date" not in req_data:
-        return jsonify( { 'message': '"date" and "persons" are mandatory parameters.' } ), 400
-
-    if not (1 <= int(req_data["persons"]) <= 20):
-        return jsonify( { 'message': 'We do not book for more than 20 persons.' } ), 400
-
-    dateFormat = "%Y-%m-%d %H:%M"
-    try:
-        bookingDate = datetime.strptime(req_data["date"], dateFormat)
-    except:
-        return jsonify({'message': "Date is not valid (YYYY-mm-dd hh:mm)."}), 400
-    # We only accept bookings from oclock or half hours.
-    minutes = bookingDate.strftime("%M")
-    if(minutes not in ["00", "30"]):
-        return jsonify({'message': "Bookings are accepted only from o'clock or half hours"}), 400
 
     # Create the booking object, without tables.
     josu = User.query.filter_by(name="josu").first()
+    bookingDate = datetime.strptime(req_data["date"], app.config["DATE_FORMAT"])
     booking = Booking(creator=josu, persons=req_data["persons"], booked_at=bookingDate )
+
     bookingManager = BookingController()
 
     # Get free tables
@@ -107,12 +117,6 @@ def create_booking():
 
     # Get bets tables for this booking.
     best_tables = bookingManager.get_best_tables_for_a_booking(free_tables, booking)
-
-    # print best_tables
-    #
-    # print tables
-    # print bookings
-
 
     return jsonify( { 'status': 'OK' } )
 

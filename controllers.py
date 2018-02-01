@@ -11,13 +11,22 @@ class BookingController():
                     persons = int(persons) - table.seats
                     assigned_tables.append(table)
                     break
-        return assigned_tables
+        return [assigned_tables, persons]
 
+    """
+        From a list of tables, and a number of persons, we get the best tables,
+        That means we get the biggest table we can that fits the people.
 
+        @parameter tables, the list of tables availables
+        @parameter booking, the booking object with the people, date, etc.
+        @return None if there are not that many tables availables
+        @return List best_tables.
+    """
     def get_best_tables_for_a_booking(self, tables, booking):
         persons = booking.persons
-        best_tables = self._get_best_table(tables, persons, [])
-        return best_tables
+        best_tables, persons_left = self._get_best_table(tables, persons, [])
+
+        return (None if persons_left > 0 else best_tables)
 
     def get_free_tables(self, booking):
         dateFormat = "%Y-%m-%d %H:%M"

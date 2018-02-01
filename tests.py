@@ -185,6 +185,19 @@ class BookingControllerTests(unittest.TestCase):
         self.assertEqual( best_tables[2].id, 9)
         self.assertEqual( best_tables[3].id, 2)
 
+        with self.app.app_context():
+            table = Table.query.get(1)
+        booking = Booking(creator=josu, persons=20, booked_at=datetime.strptime("2018-01-30 20:00", "%Y-%m-%d %H:%M") )
+        best_tables = bookingManager.get_best_tables_for_a_booking([table], booking)
+        self.assertIsNone(best_tables)
+
+        with self.app.app_context():
+            table = Table.query.get(1)
+        booking = Booking(creator=josu, persons=4, booked_at=datetime.strptime("2018-01-30 20:00", "%Y-%m-%d %H:%M") )
+        best_tables = bookingManager.get_best_tables_for_a_booking([table], booking)
+        self.assertEqual(len(best_tables), 1)
+        self.assertEqual( best_tables[0].id, 1)
+
 
 class TableTests(unittest.TestCase):
 
