@@ -12,10 +12,6 @@ class BookingTests(unittest.TestCase):
     def setUp(self):
         self.tester = app.test_client(self)
 
-    def test_get_booking_route(self):
-        response = self.tester.get("/bookings")
-        self.assertEqual(response.status_code, 200)
-
     def test_get_correct_date(self):
         response = self.tester.get("/bookings?date=2018-1-1 12:00")
         self.assertEqual(response.status_code, 200)
@@ -24,6 +20,9 @@ class BookingTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_get_incorrect_date(self):
+        response = self.tester.get("/bookings")
+        self.assertEqual(response.status_code, 400)
+
         response = self.tester.get("/bookings?date=not_valid")
         self.assertEqual(response.status_code, 400)
 
