@@ -2,7 +2,7 @@ from main import app
 import unittest
 import json
 from flask import Flask
-from models import db, Table, Booking, User
+from models import db, Table, Booking, User, UserRole
 from controllers import BookingController
 from datetime import datetime
 import copy
@@ -127,6 +127,22 @@ class BookingControllerTests(unittest.TestCase):
             self.populate_db()
 
     def populate_db(self):
+        admin = UserRole(name='Admin', desc='App admin')
+        manager = UserRole(name='Manager', desc='Restaurant manager')
+        employee = UserRole(name='Employee', desc='Restaurant employee')
+        customer = UserRole(name='Customer', desc='Restaurant customer')
+        with self.app.app_context():
+            db.session.add(admin)
+            db.session.add(manager)
+            db.session.add(employee)
+            db.session.add(customer)
+
+        josu = User(name='Josu', password='josupass', role=admin)
+        maria = User(name='Maria', password='mariapass', role=customer)
+        with self.app.app_context():
+            db.session.add(josu)
+            db.session.add(maria)
+
         table1 = Table(desc='Table closest to front door', seats=4)
         table2 = Table(desc='Table number 2', seats=2)
         table3 = Table(desc='Circular table', seats=8)
@@ -150,9 +166,28 @@ class BookingControllerTests(unittest.TestCase):
             db.session.add(table10)
             db.session.commit()
 
+        booking = Booking(creator=josu, persons=5, booked_at=datetime.strptime("2018-01-01 14:00", "%Y-%m-%d %H:%M") )
+        booking.tables.append(table1)
+        booking.tables.append(table2)
+        with self.app.app_context():
+            db.session.add(booking)
+            db.session.commit()
+
     def tearDown(self):
         with self.app.app_context():
             db.drop_all()
+
+    def test_get_correct_date(self):
+        response = self.tester.get("/bookings?date=2018-1-1 14:00")
+        json_response = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(json_response["bookings"]), 1)
+
+
+        response = self.tester.get("/bookings?date=2018-01-01 14:00")
+        json_response = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(json_response["bookings"]), 1)
 
     def test_get_best_tables(self):
         with self.app.app_context():

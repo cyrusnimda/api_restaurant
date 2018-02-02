@@ -76,13 +76,11 @@ def get_table_id(table_id):
 def get_today_bookings():
     bookingDate = datetime.now()
     bookingDate = bookingDate.replace(hour=20, minute=00)
-    bookings = Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime(app.config["DATE_FORMAT"]) )).all()
+    bookingManager = BookingController()
 
+    bookings = bookingManager.get_bookings_from_date(bookingDate)
+    bookedTables = bookingManager.get_booked_tables(bookings)
     bookings_json = bookings_schema.dump(bookings).data
-    
-    bookedTables = 0
-    for booking in bookings:
-        bookedTables = bookedTables + len(booking.tables)
 
     return jsonify(
         {
@@ -92,17 +90,16 @@ def get_today_bookings():
             'bookedTables': bookedTables
         }
     )
+
 @app.route('/bookings')
 @check_mandatory_parameters(["date"])
 def get_bookings():
     bookingDate = datetime.strptime(request.args.get('date'), app.config["DATE_FORMAT"])
-    bookings = Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime(app.config["DATE_FORMAT"]) )).all()
+    bookingManager = BookingController()
 
+    bookings = bookingManager.get_bookings_from_date(bookingDate)
+    bookedTables = bookingManager.get_booked_tables(bookings)
     bookings_json = bookings_schema.dump(bookings).data
-
-    bookedTables = 0
-    for booking in bookings:
-        bookedTables = bookedTables + len(booking.tables)
 
     return jsonify(
         {
@@ -112,7 +109,6 @@ def get_bookings():
             'bookedTables': bookedTables
         }
     )
-
 
 @app.route('/bookings', methods=['POST'])
 @check_mandatory_parameters(["date", "persons"])
