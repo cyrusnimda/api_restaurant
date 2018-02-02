@@ -1,3 +1,6 @@
 Flask==0.12.2
 Flask-SQLAlchemy==2.3.2
 click
+flask_marshmallow
+marshmallow
+marshmallow-sqlalchemy

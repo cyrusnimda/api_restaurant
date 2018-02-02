@@ -1,8 +1,9 @@
 from flask import Flask, jsonify, request
 from datetime import datetime, timedelta
-from models import db, UserRole, User, Table, Booking
+from models import db, User, Table, Booking
 from controllers import BookingController
 from functools import wraps
+from models_schemas import ma, tables_schema, table_schema, users_schema, user_schema, booking_schema, bookings_schema
 
 app = Flask(__name__)
 
@@ -11,7 +12,7 @@ app.config.from_pyfile('config.cfg')
 
 # Load database model
 db.init_app(app)
-
+ma.init_app(app)
 
 def check_mandatory_parameters(mandatory_parameters):
     def real_decorator(original_function):
@@ -59,40 +60,34 @@ def index():
 @app.route('/users')
 def get_users():
     users = User.query.all()
-    usersJSON = []
-    for user in users:
-        usersJSON.append(user.json())
-    return jsonify({'users': usersJSON})
+    return users_schema.jsonify(users)
 
 @app.route('/tables')
 def get_tables():
     tables = Table.query.all()
-    tablesJSON = []
-    for table in tables:
-        tablesJSON.append(table.json())
-    return jsonify({'tables': tablesJSON})
+    return tables_schema.jsonify(tables)
 
 @app.route('/tables/<int:table_id>')
 def get_table_id(table_id):
     table = Table.query.get_or_404(table_id)
-    return jsonify({'table': table.json()})
+    return table_schema.jsonify(table)
 
 @app.route('/bookings/today')
-def get_today_bookings():    
+def get_today_bookings():
     bookingDate = datetime.now()
     bookingDate = bookingDate.replace(hour=20, minute=00)
     bookings = Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime(app.config["DATE_FORMAT"]) )).all()
 
-    bookingsJSON = []
+    bookings_json = bookings_schema.dump(bookings).data
+    
     bookedTables = 0
     for booking in bookings:
-        bookingsJSON.append(booking.json())
         bookedTables = bookedTables + len(booking.tables)
 
     return jsonify(
         {
             'date': bookingDate.strftime(app.config["DATE_FORMAT"]),
-            'bookings': bookingsJSON,
+            'bookings': bookings_json,
             'totalTables': Table.query.count(),
             'bookedTables': bookedTables
         }
@@ -103,16 +98,16 @@ def get_bookings():
     bookingDate = datetime.strptime(request.args.get('date'), app.config["DATE_FORMAT"])
     bookings = Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime(app.config["DATE_FORMAT"]) )).all()
 
-    bookingsJSON = []
+    bookings_json = bookings_schema.dump(bookings).data
+
     bookedTables = 0
     for booking in bookings:
-        bookingsJSON.append(booking.json())
         bookedTables = bookedTables + len(booking.tables)
 
     return jsonify(
         {
             'date': bookingDate.strftime(app.config["DATE_FORMAT"]),
-            'bookings': bookingsJSON,
+            'bookings': bookings_json,
             'totalTables': Table.query.count(),
             'bookedTables': bookedTables
         }
