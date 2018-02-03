@@ -16,10 +16,31 @@ app.config.from_pyfile('config.cfg')
 db.init_app(app)
 ma.init_app(app)
 
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+
+        if not token:
+            return jsonify({'message' : 'Token is missing!'}), 401
+
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            current_user = User.query.filter_by(username=data['username']).first()
+        except:
+            return jsonify({'message' : 'Token is invalid!'}), 401
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated
+
 def check_mandatory_parameters(mandatory_parameters):
     def real_decorator(original_function):
         @wraps(original_function)
-        def wrapper_function():
+        def wrapper_function(*args, **kwargs):
             if request.method == 'POST':
                 req_data = request.get_json(force=True)
             elif request.method == 'GET':
@@ -52,7 +73,7 @@ def check_mandatory_parameters(mandatory_parameters):
                     print datetime.now(), " ---> ", bookingDate
                     return jsonify({'message': "We do not accept past dates"}), 400
 
-            return original_function()
+            return original_function(*args, **kwargs)
         return wrapper_function
     return real_decorator
 
@@ -99,8 +120,9 @@ def get_today_bookings():
     )
 
 @app.route('/bookings')
+@token_required
 @check_mandatory_parameters(["date"])
-def get_bookings():
+def get_bookings(current_user):
     bookingDate = datetime.strptime(request.args.get('date'), app.config["DATE_FORMAT"])
     bookingManager = BookingController()
 
@@ -113,7 +135,8 @@ def get_bookings():
             'date': bookingDate.strftime(app.config["DATE_FORMAT"]),
             'bookings': bookings_json,
             'totalTables': Table.query.count(),
-            'bookedTables': bookedTables
+            'bookedTables': bookedTables,
+            'current_user': current_user.name
         }
     )
 
