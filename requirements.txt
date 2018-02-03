@@ -1,6 +1,8 @@
-Flask==0.12.2
-Flask-SQLAlchemy==2.3.2
+Flask
+Flask-SQLAlchemy
 click
 flask_marshmallow
 marshmallow
 marshmallow-sqlalchemy
+bcrypt
+pyjwt

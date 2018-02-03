@@ -12,6 +12,7 @@ class UserRole(db.Model):
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True)
     name = db.Column(db.String(50))
     password = db.Column(db.String(80))
     token = db.Column(db.String(80))
@@ -19,12 +20,6 @@ class User(db.Model):
     role = db.relationship("UserRole", back_populates="user")
     bookings = db.relationship('Booking', back_populates='creator', lazy=True)
 
-    def json(self):
-        return {
-            "id" : self.id,
-            "name" : self.name,
-            "role" : self.role.name
-        }
 
 booking_tables = db.Table('booking_tables',
     db.Column('table_id', db.Integer, db.ForeignKey('table.id'), primary_key=True),
@@ -36,12 +31,6 @@ class Table(db.Model):
     desc = db.Column(db.String(200))
     seats = db.Column(db.Integer)
 
-    def json(self):
-        return {
-            "id" : self.id,
-            "desc": self.desc,
-            "seats" : self.seats
-        }
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -51,18 +40,3 @@ class Booking(db.Model):
     booked_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     creator = db.relationship("User", back_populates="bookings")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def json(self):
-        jsonBooking = {
-            "id" : self.id,
-            "booked_at" : self.booked_at.strftime('%Y-%m-%d %H:%M'),
-            "persons" : self.persons,
-            "created_at" : self.created_at.strftime('%Y-%m-%d %H:%M'),
-            "creator": self.creator.json()
-        }
-        tablesArray = []
-        for table in self.tables:
-            tablesArray.append(table.json())
-        jsonBooking["tables"] = tablesArray
-
-        return jsonBooking

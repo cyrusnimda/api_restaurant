@@ -2,6 +2,7 @@ import click
 from models import db, UserRole, User, Table, Booking
 from flask import Flask
 from datetime import datetime
+import bcrypt
 
 @click.group()
 def cli():
@@ -37,8 +38,8 @@ def init_database():
         db.session.add(employee)
         db.session.add(customer)
 
-    josu = User(name='Josu', password='josupass', role=admin)
-    maria = User(name='Maria', password='mariapass', role=customer)
+    josu = User(name='Josu Ruiz', username='josu', password=bcrypt.hashpw('josupass', bcrypt.gensalt()), role=admin)
+    maria = User(name='Maria Lopez', username='maria', password=bcrypt.hashpw('mariapass'.encode('utf-8'), bcrypt.gensalt()), role=customer)
     with app.app_context():
         db.session.add(josu)
         db.session.add(maria)

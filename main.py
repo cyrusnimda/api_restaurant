@@ -4,6 +4,8 @@ from models import db, User, Table, Booking
 from controllers import BookingController
 from functools import wraps
 from models_schemas import ma, tables_schema, table_schema, users_schema, user_schema, booking_schema, bookings_schema
+import bcrypt
+import jwt
 
 app = Flask(__name__)
 
@@ -44,6 +46,11 @@ def check_mandatory_parameters(mandatory_parameters):
                 minutes = bookingDate.strftime("%M")
                 if(minutes not in ["00", "30"]):
                     return jsonify({'message': "Bookings are accepted only from o'clock or half hours"}), 400
+
+                # We do not accept bookings in the past.
+                if request.method == 'POST' and datetime.now() > bookingDate:
+                    print datetime.now(), " ---> ", bookingDate
+                    return jsonify({'message': "We do not accept past dates"}), 400
 
             return original_function()
         return wrapper_function
@@ -129,6 +136,23 @@ def create_booking():
     best_tables = bookingManager.get_best_tables_for_a_booking(free_tables, booking)
 
     return jsonify( { 'status': 'OK' } )
+
+@app.route('/login', methods=['POST'])
+@check_mandatory_parameters(["username", "password"])
+def login():
+    req_data = request.get_json(force=True)
+    user = User.query.filter_by(username=req_data["username"]).first()
+
+    if not user:
+        return jsonify({'message': 'Could not verify.'}), 401
+
+    #hashed = bcrypt.hashpw(req_data["password"].encode('utf-8'), bcrypt.gensalt())
+    if bcrypt.hashpw(req_data["password"].encode('utf-8'), user.password.encode('utf-8')) == user.password.encode('utf-8'):
+        #token = jwt.encode({'username' : user.username}, app.config['SECRET_KEY'], algorithm='HS256')
+        token = jwt.encode({'username' : user.username, 'exp' : datetime.utcnow() + timedelta(minutes=30)}, app.config['SECRET_KEY'])
+        return jsonify({'token' : token})
+
+    return jsonify({'message': 'User or Password incorrect.'}), 401
 
 
 if __name__ == '__main__':

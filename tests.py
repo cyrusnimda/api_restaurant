@@ -6,6 +6,7 @@ from models import db, Table, Booking, User, UserRole
 from controllers import BookingController
 from datetime import datetime
 import copy
+import os.path
 
 class BookingTests(unittest.TestCase):
 
@@ -55,7 +56,7 @@ class BookingTests(unittest.TestCase):
     def test_post_correct_booking_route(self):
         data = {
             'persons': 1,
-            'date': '2018-01-30 17:00'
+            'date': '2028-01-30 17:00'
         }
         response = self.tester.post("/bookings",
                               data=json.dumps(data),
@@ -64,7 +65,7 @@ class BookingTests(unittest.TestCase):
 
         data = {
             'persons': '20',
-            'date': '2018-01-30 17:00'
+            'date': '2028-01-30 17:00'
         }
         response = self.tester.post("/bookings",
                               data=json.dumps(data),
@@ -90,7 +91,17 @@ class BookingTests(unittest.TestCase):
                               content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
-    def test_post_error_date_route(self):
+    def test_post_error_date_past(self):
+        data = {
+            'persons': 1,
+            'date': '2015-01-30 17:00'
+        }
+        response = self.tester.post("/bookings",
+                              data=json.dumps(data),
+                              content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+
+    def test_post_error_date_format(self):
         data = {
             'persons': 4,
             'date': '2018-01-30 17:00:00'
@@ -251,6 +262,19 @@ class TableTests(unittest.TestCase):
 
         response = self.tester.get("/tables/999999")
         self.assertEqual(response.status_code, 404)
+
+
+class ConfigTests(unittest.TestCase):
+    def test_config_file_exists(self):
+        filename = "config.cfg"
+        self.assertTrue( os.path.isfile(filename) )
+
+    def test_config_keys(self):
+        self.assertIn( "DATE_FORMAT", app.config)
+        self.assertIn( "SECRET_KEY", app.config)
+        self.assertIn( "SQLALCHEMY_DATABASE_URI", app.config)
+        self.assertIn( "SQLALCHEMY_TRACK_MODIFICATIONS", app.config)
+
 
 if __name__ == '__main__':
     unittest.main()
