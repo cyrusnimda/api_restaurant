@@ -9,35 +9,46 @@ import copy
 import os.path
 
 class BookingTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        data = {'username': 'josu',
+                'password': 'josupass'}
+        tester = app.test_client(cls)
+        response = tester.post("/login",
+                              data=json.dumps(data),
+                              content_type='application/json')
+        json_response = json.loads(response.data)
+        cls.token = json_response["token"]
 
     def setUp(self):
+        self.headers = {'Content-Type': 'application/json', 'x-access-token': self.token}
         self.tester = app.test_client(self)
 
     def test_get_correct_date(self):
-        response = self.tester.get("/bookings?date=2018-1-1 12:00")
+        response = self.tester.get("/bookings?date=2018-1-1 12:00", headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
-        response = self.tester.get("/bookings?date=2018-01-01 12:00")
+        response = self.tester.get("/bookings?date=2018-01-01 12:00", headers=self.headers)
         self.assertEqual(response.status_code, 200)
 
     def test_get_incorrect_date(self):
-        response = self.tester.get("/bookings")
+        response = self.tester.get("/bookings", headers=self.headers)
         self.assertEqual(response.status_code, 400)
 
-        response = self.tester.get("/bookings?date=not_valid")
+        response = self.tester.get("/bookings?date=not_valid", headers=self.headers)
         self.assertEqual(response.status_code, 400)
 
-        response = self.tester.get("/bookings?date=2018-1-1")
+        response = self.tester.get("/bookings?date=2018-1-1", headers=self.headers)
         self.assertEqual(response.status_code, 400)
 
-        response = self.tester.get("/bookings?date=2018-1-1 12:12")
+        response = self.tester.get("/bookings?date=2018-1-1 12:12", headers=self.headers)
         self.assertEqual(response.status_code, 400)
 
-        response = self.tester.get("/bookings?date=2018-1-1 12:12:00")
+        response = self.tester.get("/bookings?date=2018-1-1 12:12:00", headers=self.headers)
         self.assertEqual(response.status_code, 400)
 
     def test_post_empty_booking_route(self):
-        response = self.tester.post("/bookings")
+        response = self.tester.post("/bookings", headers=self.headers)
         self.assertEqual(response.status_code, 400)
 
     def test_post_mandatory_parameter_missing_booking_route(self):
@@ -123,8 +134,20 @@ class BookingTests(unittest.TestCase):
 
 
 class BookingControllerTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        data = {'username': 'josu',
+                'password': 'josupass'}
+        tester = app.test_client(cls)
+        response = tester.post("/login",
+                              data=json.dumps(data),
+                              content_type='application/json')
+        json_response = json.loads(response.data)
+        cls.token = json_response["token"]
+
 
     def setUp(self):
+        self.headers = {'Content-Type': 'application/json', 'x-access-token': self.token}
         self.tester = app.test_client(self)
 
         # Creates a new database for the unit test to use
@@ -189,13 +212,13 @@ class BookingControllerTests(unittest.TestCase):
             db.drop_all()
 
     def test_get_correct_date(self):
-        response = self.tester.get("/bookings?date=2018-1-1 14:00")
+        response = self.tester.get("/bookings?date=2018-1-1 14:00", headers=self.headers)
         json_response = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(json_response["bookings"]), 1)
 
 
-        response = self.tester.get("/bookings?date=2018-01-01 14:00")
+        response = self.tester.get("/bookings?date=2018-01-01 14:00", headers=self.headers)
         json_response = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(json_response["bookings"]), 1)

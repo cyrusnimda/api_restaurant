@@ -70,7 +70,6 @@ def check_mandatory_parameters(mandatory_parameters):
 
                 # We do not accept bookings in the past.
                 if request.method == 'POST' and datetime.now() > bookingDate:
-                    print datetime.now(), " ---> ", bookingDate
                     return jsonify({'message': "We do not accept past dates"}), 400
 
             return original_function(*args, **kwargs)
