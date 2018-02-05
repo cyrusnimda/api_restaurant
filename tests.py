@@ -8,7 +8,7 @@ from datetime import datetime
 import copy
 import os.path
 
-class BookingTests(unittest.TestCase):
+class ApiRestaurantTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         data = {'username': 'josu',
@@ -23,6 +23,69 @@ class BookingTests(unittest.TestCase):
     def setUp(self):
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.token}
         self.tester = app.test_client(self)
+
+        # Creates a new database for the unit test to use
+        self.app = Flask(__name__)
+        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+        self.app.config['TESTING'] = True
+        db.init_app(self.app)
+        with self.app.app_context():
+            db.create_all()
+            self.populate_db()
+
+    def populate_db(self):
+        admin = UserRole(name='Admin', desc='App admin')
+        manager = UserRole(name='Manager', desc='Restaurant manager')
+        employee = UserRole(name='Employee', desc='Restaurant employee')
+        customer = UserRole(name='Customer', desc='Restaurant customer')
+        with self.app.app_context():
+            db.session.add(admin)
+            db.session.add(manager)
+            db.session.add(employee)
+            db.session.add(customer)
+
+        josu = User(name='Josu', password='josupass', role=admin)
+        maria = User(name='Maria', password='mariapass', role=customer)
+        with self.app.app_context():
+            db.session.add(josu)
+            db.session.add(maria)
+
+        table1 = Table(desc='Table closest to front door', seats=4)
+        table2 = Table(desc='Table number 2', seats=2)
+        table3 = Table(desc='Circular table', seats=8)
+        table4 = Table(desc='Table number 4', seats=2)
+        table5 = Table(desc='Table number 5', seats=2)
+        table6 = Table(desc='Table number 6', seats=4)
+        table7 = Table(desc='Table number 7', seats=4)
+        table8 = Table(desc='Table number 8', seats=4)
+        table9 = Table(desc='Table number 9', seats=4)
+        table10 = Table(desc='Table number 10', seats=6)
+        with self.app.app_context():
+            db.session.add(table1)
+            db.session.add(table2)
+            db.session.add(table3)
+            db.session.add(table4)
+            db.session.add(table5)
+            db.session.add(table6)
+            db.session.add(table7)
+            db.session.add(table8)
+            db.session.add(table9)
+            db.session.add(table10)
+            db.session.commit()
+
+        booking = Booking(creator=josu, persons=5, booked_at=datetime.strptime("2018-01-01 14:00", "%Y-%m-%d %H:%M") )
+        booking.tables.append(table1)
+        booking.tables.append(table2)
+        with self.app.app_context():
+            db.session.add(booking)
+            db.session.commit()
+
+    def tearDown(self):
+        with self.app.app_context():
+            db.drop_all()
+
+class BookingTests(ApiRestaurantTest):
 
     def test_get_correct_date(self):
         response = self.tester.get("/bookings?date=2018-1-1 12:00", headers=self.headers)
@@ -133,83 +196,7 @@ class BookingTests(unittest.TestCase):
 
 
 
-class BookingControllerTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        data = {'username': 'josu',
-                'password': 'josupass'}
-        tester = app.test_client(cls)
-        response = tester.post("/login",
-                              data=json.dumps(data),
-                              content_type='application/json')
-        json_response = json.loads(response.data)
-        cls.token = json_response["token"]
-
-
-    def setUp(self):
-        self.headers = {'Content-Type': 'application/json', 'x-access-token': self.token}
-        self.tester = app.test_client(self)
-
-        # Creates a new database for the unit test to use
-        self.app = Flask(__name__)
-        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-        self.app.config['TESTING'] = True
-        db.init_app(self.app)
-        with self.app.app_context():
-            db.create_all()
-            self.populate_db()
-
-    def populate_db(self):
-        admin = UserRole(name='Admin', desc='App admin')
-        manager = UserRole(name='Manager', desc='Restaurant manager')
-        employee = UserRole(name='Employee', desc='Restaurant employee')
-        customer = UserRole(name='Customer', desc='Restaurant customer')
-        with self.app.app_context():
-            db.session.add(admin)
-            db.session.add(manager)
-            db.session.add(employee)
-            db.session.add(customer)
-
-        josu = User(name='Josu', password='josupass', role=admin)
-        maria = User(name='Maria', password='mariapass', role=customer)
-        with self.app.app_context():
-            db.session.add(josu)
-            db.session.add(maria)
-
-        table1 = Table(desc='Table closest to front door', seats=4)
-        table2 = Table(desc='Table number 2', seats=2)
-        table3 = Table(desc='Circular table', seats=8)
-        table4 = Table(desc='Table number 4', seats=2)
-        table5 = Table(desc='Table number 5', seats=2)
-        table6 = Table(desc='Table number 6', seats=4)
-        table7 = Table(desc='Table number 7', seats=4)
-        table8 = Table(desc='Table number 8', seats=4)
-        table9 = Table(desc='Table number 9', seats=4)
-        table10 = Table(desc='Table number 10', seats=6)
-        with self.app.app_context():
-            db.session.add(table1)
-            db.session.add(table2)
-            db.session.add(table3)
-            db.session.add(table4)
-            db.session.add(table5)
-            db.session.add(table6)
-            db.session.add(table7)
-            db.session.add(table8)
-            db.session.add(table9)
-            db.session.add(table10)
-            db.session.commit()
-
-        booking = Booking(creator=josu, persons=5, booked_at=datetime.strptime("2018-01-01 14:00", "%Y-%m-%d %H:%M") )
-        booking.tables.append(table1)
-        booking.tables.append(table2)
-        with self.app.app_context():
-            db.session.add(booking)
-            db.session.commit()
-
-    def tearDown(self):
-        with self.app.app_context():
-            db.drop_all()
+class BookingControllerTests(ApiRestaurantTest):
 
     def test_get_correct_date(self):
         response = self.tester.get("/bookings?date=2018-1-1 14:00", headers=self.headers)
@@ -267,10 +254,7 @@ class BookingControllerTests(unittest.TestCase):
         self.assertEqual( best_tables[0].id, 1)
 
 
-class TableTests(unittest.TestCase):
-
-    def setUp(self):
-        self.tester = app.test_client(self)
+class TableTests(ApiRestaurantTest):
 
     def test_table_route(self):
         response = self.tester.get("/tables")
