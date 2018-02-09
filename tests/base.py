@@ -5,12 +5,22 @@ from api.models import db, Table, Booking, User, UserRole
 from api.config import TestConfig
 from datetime import datetime
 import bcrypt
+import json
 
 class BaseTestCase(TestCase):
-    """A base test case."""
+
+
+    def get_token(self):
+        data = {'username': 'josu',
+                'password': 'josupass'}
+        response = self.client.post("/login",
+                              data=json.dumps(data),
+                              content_type='application/json')
+        json_response = json.loads(response.data)
+        return json_response["token"];
 
     def create_app(self):
-        app.config.from_object(TestConfig)
+        self.app = app.config.from_object(TestConfig)
         return app
 
     def setUp(self):
@@ -27,7 +37,7 @@ class BaseTestCase(TestCase):
         manager = UserRole(name='Manager', desc='Restaurant manager')
         employee = UserRole(name='Employee', desc='Restaurant employee')
         customer = UserRole(name='Customer', desc='Restaurant customer')
-        with app.app_context():
+        with self.app.app_context():
             db.session.add(admin)
             db.session.add(manager)
             db.session.add(employee)
@@ -35,7 +45,7 @@ class BaseTestCase(TestCase):
 
         josu = User(name='Josu Ruiz', username='josu', password=bcrypt.hashpw('josupass', bcrypt.gensalt()), role=admin)
         maria = User(name='Maria Lopez', username='maria', password=bcrypt.hashpw('mariapass', bcrypt.gensalt()), role=customer)
-        with app.app_context():
+        with self.app.app_context():
             db.session.add(josu)
             db.session.add(maria)
 
@@ -49,7 +59,7 @@ class BaseTestCase(TestCase):
         table8 = Table(desc='Table number 8', seats=4)
         table9 = Table(desc='Table number 9', seats=4)
         table10 = Table(desc='Table number 10', seats=6)
-        with app.app_context():
+        with self.app.app_context():
             db.session.add(table1)
             db.session.add(table2)
             db.session.add(table3)
@@ -65,6 +75,6 @@ class BaseTestCase(TestCase):
         booking = Booking(creator=josu, persons=5, booked_at=datetime.strptime("2018-01-01 14:00", "%Y-%m-%d %H:%M") )
         booking.tables.append(table1)
         booking.tables.append(table2)
-        with app.app_context():
+        with self.app.app_context():
             db.session.add(booking)
             db.session.commit()
