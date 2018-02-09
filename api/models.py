@@ -15,7 +15,6 @@ class User(db.Model):
     username = db.Column(db.String(50), unique=True)
     name = db.Column(db.String(50))
     password = db.Column(db.String(80))
-    token = db.Column(db.String(80))
     role_id = db.Column(db.Integer, db.ForeignKey('user_role.id'), nullable=False)
     role = db.relationship("UserRole", back_populates="user")
     bookings = db.relationship('Booking', back_populates='creator', lazy=True)

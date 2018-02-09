@@ -7,8 +7,8 @@ class UserSchema(ma.ModelSchema):
     class Meta:
         model = User
 
-user_schema = UserSchema()
-users_schema = UserSchema(many=True)
+user_schema = UserSchema(exclude=['password'])
+users_schema = UserSchema(exclude=['password'], many=True)
 
 class TableSchema(ma.ModelSchema):
     class Meta:

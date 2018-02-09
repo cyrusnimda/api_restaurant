@@ -37,12 +37,14 @@ def init_database():
         db.session.add(manager)
         db.session.add(employee)
         db.session.add(customer)
+        db.session.commit()
 
     josu = User(name='Josu Ruiz', username='josu', password=bcrypt.hashpw('josu1$pass', bcrypt.gensalt()), role=admin)
     maria = User(name='Maria Lopez', username='maria', password=bcrypt.hashpw('maria1$pass', bcrypt.gensalt()), role=customer)
     with app.app_context():
         db.session.add(josu)
         db.session.add(maria)
+        db.session.commit()
 
     table1 = Table(desc='Table closest to front door', seats=4)
     table2 = Table(desc='Table number 2', seats=2)

@@ -86,9 +86,25 @@ def index():
     return jsonify({'message': "Wellcome to restaurant API."})
 
 @app.route('/users')
-def get_users():
+@token_required
+def get_users(current_user):
+    if 'Admin' != current_user.role.name:
+        return jsonify({'message': 'Permission denied.'}), 403
     users = User.query.all()
     return users_schema.jsonify(users)
+
+@app.route('/user/<int:user_id>')
+@token_required
+def get_user_id(current_user, user_id):
+    user = User.query.get_or_404(user_id)
+    if user != current_user:
+        return jsonify({'message': 'Permission denied.'}), 403
+    return user_schema.jsonify(user)
+
+@app.route('/user/me')
+@token_required
+def get_user_me(current_user):
+    return user_schema.jsonify(current_user)
 
 @app.route('/tables')
 def get_tables():

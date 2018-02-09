@@ -10,9 +10,9 @@ import json
 class BaseTestCase(TestCase):
 
 
-    def get_token(self):
-        data = {'username': 'josu',
-                'password': 'josupass'}
+    def get_token(self, user='josu', password='josupass'):
+        data = {'username': user,
+                'password': password}
         response = self.client.post("/login",
                               data=json.dumps(data),
                               content_type='application/json')
@@ -42,12 +42,14 @@ class BaseTestCase(TestCase):
             db.session.add(manager)
             db.session.add(employee)
             db.session.add(customer)
+            db.session.commit()
 
         josu = User(name='Josu Ruiz', username='josu', password=bcrypt.hashpw('josupass', bcrypt.gensalt()), role=admin)
         maria = User(name='Maria Lopez', username='maria', password=bcrypt.hashpw('mariapass', bcrypt.gensalt()), role=customer)
         with self.app.app_context():
             db.session.add(josu)
             db.session.add(maria)
+            db.session.commit()
 
         table1 = Table(desc='Table closest to front door', seats=4)
         table2 = Table(desc='Table number 2', seats=2)
