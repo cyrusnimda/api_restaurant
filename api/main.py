@@ -117,7 +117,8 @@ def get_table_id(table_id):
     return table_schema.jsonify(table)
 
 @app.route('/bookings/today')
-def get_today_bookings():
+@token_required
+def get_today_bookings(current_user):
     bookingDate = datetime.now()
     bookingDate = bookingDate.replace(hour=20, minute=00)
     bookingManager = BookingController()
@@ -158,13 +159,13 @@ def get_bookings(current_user):
 
 @app.route('/bookings', methods=['POST'])
 @check_mandatory_parameters(["date", "persons"])
-def create_booking():
+@token_required
+def create_booking(current_user):
     req_data = request.get_json(force=True)
 
     # Create the booking object, without tables.
-    josu = User.query.filter_by(name="josu").first()
     bookingDate = datetime.strptime(req_data["date"], app.config["DATE_FORMAT"])
-    booking = Booking(creator=josu, persons=req_data["persons"], booked_at=bookingDate )
+    booking = Booking(creator=current_user, persons=req_data["persons"], booked_at=bookingDate )
 
     bookingManager = BookingController()
 
@@ -173,8 +174,20 @@ def create_booking():
 
     # Get bets tables for this booking.
     best_tables = bookingManager.get_best_tables_for_a_booking(free_tables, booking)
+    if None == best_tables:
+        return jsonify( { 'message': 'There are not that many availables tables' } ), 400
 
-    return jsonify( { 'status': 'OK' } )
+    for table in best_tables:
+        booking.tables.append(table)
+    db.session.add(booking)
+    db.session.commit()
+
+    return jsonify(
+        {
+        'status': 'OK',
+        'booking': booking_schema.dump(booking).data
+        }
+    )
 
 @app.route('/login', methods=['POST'])
 @check_mandatory_parameters(["username", "password"])

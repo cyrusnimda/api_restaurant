@@ -62,6 +62,15 @@ class RoutesTests(BaseTestCase):
         response = self.client.post("/bookings", headers=self.headers)
         self.assert400(response)
 
+    def test_get_today_bookings(self):
+        self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
+        response = self.client.get("/bookings/today", headers=self.headers)
+        self.assert200(response)
+
+    def test_get_today_bookings_without_token(self):
+        response = self.client.get("/bookings/today")
+        self.assert401(response)
+
     def test_post_mandatory_parameter_missing_booking_route(self):
         data = {'persons': 4}
         response = self.client.post("/bookings",
@@ -76,11 +85,13 @@ class RoutesTests(BaseTestCase):
         self.assert400(response)
 
     def test_post_correct_booking_route(self):
+        self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 1,
             'date': '2028-01-30 17:00'
         }
         response = self.client.post("/bookings",
+                              headers=self.headers,
                               data=json.dumps(data),
                               content_type='application/json')
         self.assert200(response)
@@ -91,6 +102,7 @@ class RoutesTests(BaseTestCase):
         }
         response = self.client.post("/bookings",
                               data=json.dumps(data),
+                              headers=self.headers,
                               content_type='application/json')
         self.assert200(response)
 
