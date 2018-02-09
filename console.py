@@ -1,5 +1,5 @@
 import click
-from models import db, UserRole, User, Table, Booking
+from api.models import db, UserRole, User, Table, Booking
 from flask import Flask
 from datetime import datetime
 import bcrypt
@@ -13,13 +13,13 @@ def init_database():
     print "Creating database with demo data..."
 
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///restaurant.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///api/restaurant.db'
     db.init_app(app)
 
     # remove file if exists
     import os.path
     import sys
-    file = "./restaurant.db"
+    file = "./api/restaurant.db"
     database_exists = os.path.isfile(file)
     if database_exists:
         os.remove(file)
@@ -38,8 +38,8 @@ def init_database():
         db.session.add(employee)
         db.session.add(customer)
 
-    josu = User(name='Josu Ruiz', username='josu', password=bcrypt.hashpw('josupass', bcrypt.gensalt()), role=admin)
-    maria = User(name='Maria Lopez', username='maria', password=bcrypt.hashpw('mariapass'.encode('utf-8'), bcrypt.gensalt()), role=customer)
+    josu = User(name='Josu Ruiz', username='josu', password=bcrypt.hashpw('josu1$pass', bcrypt.gensalt()), role=admin)
+    maria = User(name='Maria Lopez', username='maria', password=bcrypt.hashpw('maria1$pass', bcrypt.gensalt()), role=customer)
     with app.app_context():
         db.session.add(josu)
         db.session.add(maria)

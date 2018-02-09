@@ -45,8 +45,8 @@ class ApiRestaurantTest(unittest.TestCase):
             db.session.add(employee)
             db.session.add(customer)
 
-        josu = User(name='Josu', password='josupass', role=admin)
-        maria = User(name='Maria', password='mariapass', role=customer)
+        josu = User(name='Josu Ruiz', username='josu', password=bcrypt.hashpw('josu1$pass', bcrypt.gensalt()), role=admin)
+        maria = User(name='Maria Lopez', username='maria', password=bcrypt.hashpw('maria1$pass', bcrypt.gensalt()), role=customer)
         with self.app.app_context():
             db.session.add(josu)
             db.session.add(maria)

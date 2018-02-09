@@ -6,3 +6,4 @@ marshmallow
 marshmallow-sqlalchemy
 bcrypt
 pyjwt
+Flask-Testing==0.4.2

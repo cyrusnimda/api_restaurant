@@ -6,11 +6,12 @@ from functools import wraps
 from models_schemas import ma, tables_schema, table_schema, users_schema, user_schema, booking_schema, bookings_schema
 import bcrypt
 import jwt
+from config import DevelopmentConfig
 
 app = Flask(__name__)
 
 # Load config file
-app.config.from_pyfile('config.cfg')
+app.config.from_object(DevelopmentConfig)
 
 # Load database model
 db.init_app(app)
