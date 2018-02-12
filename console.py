@@ -4,10 +4,16 @@ from api.main import app
 from flask import Flask
 from datetime import datetime
 import bcrypt
+import unittest
 
 @click.group()
 def cli():
-    click.echo("Wellcome.")
+    pass
+
+@cli.command()
+def run_tests():
+    tests = unittest.TestLoader().discover('tests')
+    unittest.TextTestRunner(verbosity=2).run(tests)
 
 @cli.command()
 def init_database():
