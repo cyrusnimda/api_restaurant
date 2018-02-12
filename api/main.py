@@ -224,9 +224,9 @@ def login():
     if not user:
         return jsonify({'message': 'Could not verify.'}), 401
 
-    #hashed = bcrypt.hashpw(req_data["password"].encode('utf-8'), bcrypt.gensalt())
-    if bcrypt.hashpw(req_data["password"].encode('utf-8'), user.password.encode('utf-8')) == user.password.encode('utf-8'):
-        #token = jwt.encode({'username' : user.username}, app.config['SECRET_KEY'], algorithm='HS256')
+    password = req_data["password"].encode('utf-8')
+    hashed = user.password.encode('utf-8')
+    if bcrypt.checkpw(password, hashed):
         token = jwt.encode({'username' : user.username, 'exp' : datetime.utcnow() + timedelta(minutes=30)}, app.config['SECRET_KEY'])
         return jsonify({'token' : token})
 
