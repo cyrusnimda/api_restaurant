@@ -11,6 +11,10 @@ def cli():
     pass
 
 @cli.command()
+def run_api():
+    app.run()
+
+@cli.command()
 def run_tests():
     tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)

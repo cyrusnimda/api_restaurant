@@ -1,3 +1,4 @@
+# copy this file as config.py and edit database info, etc.
 
 class BaseConfig(object):
     SECRET_KEY='Please_change_this_secret_key_398473723'
