@@ -93,7 +93,7 @@ def get_users(current_user):
     users = User.query.all()
     return users_schema.jsonify(users)
 
-@app.route('/user/<int:user_id>')
+@app.route('/users/<int:user_id>')
 @token_required
 def get_user_id(current_user, user_id):
     if 'Admin' != current_user.role.name:
@@ -101,7 +101,17 @@ def get_user_id(current_user, user_id):
     user = User.query.get_or_404(user_id)
     return user_schema.jsonify(user)
 
-@app.route('/user/me')
+@app.route('/users/<int:user_id>', methods=['DELETE'])
+@token_required
+def remove_user_id(current_user, user_id):
+    if 'Admin' != current_user.role.name:
+        return jsonify({'message': 'Permission denied.'}), 403
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({'message': 'User deleted.'})
+
+@app.route('/users/me')
 @token_required
 def get_user_me(current_user):
     return user_schema.jsonify(current_user)
@@ -156,6 +166,22 @@ def get_bookings(current_user):
             'current_user': current_user.name
         }
     )
+
+@app.route('/bookings/<int:booking_id>')
+@token_required
+def get_booking_id(current_user, booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    return booking_schema.jsonify(booking)
+
+@app.route('/bookings/<int:booking_id>', methods=['DELETE'])
+@token_required
+def remove_booking_id(current_user, booking_id):
+    if 'Admin' != current_user.role.name:
+        return jsonify({'message': 'Permission denied.'}), 403
+    booking = Booking.query.get_or_404(booking_id)
+    db.session.delete(booking)
+    db.session.commit()
+    return jsonify({'message': 'Booking deleted.'})
 
 @app.route('/bookings', methods=['POST'])
 @check_mandatory_parameters(["date", "persons"])
