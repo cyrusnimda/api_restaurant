@@ -38,5 +38,17 @@ class UserTests(BaseTestCase):
         response = self.client.get("/users/2", headers=self.headers)
         self.assert403(response)
 
+    def test_delete_user_admin(self):
+        self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
+        response = self.client.delete("/users/2", headers=self.headers)
+        self.assert200(response)
+        response = self.client.get("/users/2", headers=self.headers)
+        self.assert404(response)
+
+    def test_delete_user_no_admin(self):
+        self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token('maria','mariapass')}
+        response = self.client.delete("/users/2", headers=self.headers)
+        self.assert403(response)
+
 if __name__ == '__main__':
     unittest.main()

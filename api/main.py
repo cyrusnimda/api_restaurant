@@ -17,26 +17,25 @@ app.config.from_object(DevelopmentConfig)
 db.init_app(app)
 ma.init_app(app)
 
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
-
-        if 'x-access-token' in request.headers:
+def token_required(role_needed = None):
+    def token_real_decorator(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            if not 'x-access-token' in request.headers:
+                return jsonify({'message' : 'Token is missing!'}), 401
             token = request.headers['x-access-token']
 
-        if not token:
-            return jsonify({'message' : 'Token is missing!'}), 401
+            try:
+                data = jwt.decode(token, app.config['SECRET_KEY'])
+                current_user = User.query.filter_by(username=data['username']).first()
+                if role_needed and role_needed != current_user.role.name:
+                    return jsonify({'message': 'Permission denied.'}), 403
+            except:
+                return jsonify({'message' : 'Token is invalid!'}), 401
 
-        try:
-            data = jwt.decode(token, app.config['SECRET_KEY'])
-            current_user = User.query.filter_by(username=data['username']).first()
-        except:
-            return jsonify({'message' : 'Token is invalid!'}), 401
-
-        return f(current_user, *args, **kwargs)
-
-    return decorated
+            return f(current_user, *args, **kwargs)
+        return decorated
+    return token_real_decorator
 
 def check_mandatory_parameters(mandatory_parameters):
     def real_decorator(original_function):
@@ -86,33 +85,27 @@ def index():
     return jsonify({'message': "Wellcome to restaurant API."})
 
 @app.route('/users')
-@token_required
+@token_required('Admin')
 def get_users(current_user):
-    if 'Admin' != current_user.role.name:
-        return jsonify({'message': 'Permission denied.'}), 403
     users = User.query.all()
     return users_schema.jsonify(users)
 
 @app.route('/users/<int:user_id>')
-@token_required
+@token_required('Admin')
 def get_user_id(current_user, user_id):
-    if 'Admin' != current_user.role.name:
-        return jsonify({'message': 'Permission denied.'}), 403
     user = User.query.get_or_404(user_id)
     return user_schema.jsonify(user)
 
 @app.route('/users/<int:user_id>', methods=['DELETE'])
-@token_required
+@token_required('Admin')
 def remove_user_id(current_user, user_id):
-    if 'Admin' != current_user.role.name:
-        return jsonify({'message': 'Permission denied.'}), 403
     user = User.query.get_or_404(user_id)
     db.session.delete(user)
     db.session.commit()
     return jsonify({'message': 'User deleted.'})
 
 @app.route('/users/me')
-@token_required
+@token_required()
 def get_user_me(current_user):
     return user_schema.jsonify(current_user)
 
@@ -127,7 +120,7 @@ def get_table_id(table_id):
     return table_schema.jsonify(table)
 
 @app.route('/bookings/today')
-@token_required
+@token_required()
 def get_today_bookings(current_user):
     bookingDate = datetime.now()
     bookingDate = bookingDate.replace(hour=20, minute=00)
@@ -147,7 +140,7 @@ def get_today_bookings(current_user):
     )
 
 @app.route('/bookings')
-@token_required
+@token_required()
 @check_mandatory_parameters(["date"])
 def get_bookings(current_user):
     bookingDate = datetime.strptime(request.args.get('date'), app.config["DATE_FORMAT"])
@@ -168,16 +161,14 @@ def get_bookings(current_user):
     )
 
 @app.route('/bookings/<int:booking_id>')
-@token_required
+@token_required()
 def get_booking_id(current_user, booking_id):
     booking = Booking.query.get_or_404(booking_id)
     return booking_schema.jsonify(booking)
 
 @app.route('/bookings/<int:booking_id>', methods=['DELETE'])
-@token_required
+@token_required('Admin')
 def remove_booking_id(current_user, booking_id):
-    if 'Admin' != current_user.role.name:
-        return jsonify({'message': 'Permission denied.'}), 403
     booking = Booking.query.get_or_404(booking_id)
     db.session.delete(booking)
     db.session.commit()
@@ -185,7 +176,7 @@ def remove_booking_id(current_user, booking_id):
 
 @app.route('/bookings', methods=['POST'])
 @check_mandatory_parameters(["date", "persons"])
-@token_required
+@token_required()
 def create_booking(current_user):
     req_data = request.get_json(force=True)
 
