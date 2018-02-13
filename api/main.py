@@ -213,7 +213,7 @@ def login():
     user = User.query.filter_by(username=req_data["username"]).first()
 
     if not user:
-        return jsonify({'message': 'Could not verify.'}), 401
+        return jsonify({'message': 'User or Password incorrect.'}), 401
 
     password = req_data["password"].encode('utf-8')
     hashed = user.password.encode('utf-8')
@@ -225,4 +225,4 @@ def login():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=8080)
