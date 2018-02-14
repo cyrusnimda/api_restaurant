@@ -5,6 +5,7 @@ class BaseConfig(object):
     SQLALCHEMY_DATABASE_URI='mysql://username:password@server/db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DATE_FORMAT = "%Y-%m-%d %H:%M"
+    PORT = 8080
 
 
 class TestConfig(BaseConfig):
