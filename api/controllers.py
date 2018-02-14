@@ -39,6 +39,17 @@ class BookingController():
                                         ).all()
         return bookings
 
+    def get_bookings_today(self):
+        bookingDateStart = datetime.now()
+        bookingDateStart = bookingDateStart.replace(hour=9, minute=00)
+
+        bookingDateEnd = datetime.now()
+        bookingDateEnd = bookingDateEnd.replace(hour=23, minute=00)
+        bookings = Booking.query.filter(Booking.booked_at >= bookingDateStart.strftime(self.DATE_FORMAT),
+                                        Booking.booked_at <= bookingDateEnd.strftime(self.DATE_FORMAT)
+                                        ).all()
+        return bookings
+
     def get_free_tables(self, booking):
         bookings = self.get_bookings_from_date(booking.booked_at)
 

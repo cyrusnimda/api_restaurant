@@ -122,17 +122,14 @@ def get_table_id(table_id):
 @app.route('/bookings/today')
 @token_required()
 def get_today_bookings(current_user):
-    bookingDate = datetime.now()
-    bookingDate = bookingDate.replace(hour=20, minute=00)
     bookingManager = BookingController()
 
-    bookings = bookingManager.get_bookings_from_date(bookingDate)
+    bookings = bookingManager.get_bookings_today()
     bookedTables = bookingManager.get_booked_tables(bookings)
     bookings_json = bookings_schema.dump(bookings).data
 
     return jsonify(
         {
-            'date': bookingDate.strftime(app.config["DATE_FORMAT"]),
             'bookings': bookings_json,
             'totalTables': Table.query.count(),
             'bookedTables': bookedTables
