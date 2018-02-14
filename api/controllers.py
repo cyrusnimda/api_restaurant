@@ -29,15 +29,18 @@ class BookingController():
 
         return (None if persons_left > 0 else best_tables)
 
-    def get_free_tables(self, booking):
-
+    def get_bookings_from_date(self, bookingDate):
         # Booking are for 1 hour, so we need to check 30 minutes before
         # or after to check if these tables are available.
-        bookingDateStart = booking.booked_at - timedelta(minutes = 30)
-        bookingDateEnd = booking.booked_at + timedelta(minutes = 30)
+        bookingDateStart = bookingDate - timedelta(minutes = 30)
+        bookingDateEnd = bookingDate + timedelta(minutes = 30)
         bookings = Booking.query.filter(Booking.booked_at >= bookingDateStart.strftime(self.DATE_FORMAT),
                                         Booking.booked_at <= bookingDateEnd.strftime(self.DATE_FORMAT)
                                         ).all()
+        return bookings
+
+    def get_free_tables(self, booking):
+        bookings = self.get_bookings_from_date(booking.booked_at)
 
         # Get free tables
         tables = Table.query.order_by(Table.seats).all()
@@ -54,5 +57,5 @@ class BookingController():
             bookedTables = bookedTables + len(booking.tables)
         return bookedTables
 
-    def get_bookings_from_date(self, bookingDate):
+    def get_bookings_from_exact_date(self, bookingDate):
         return Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime(self.DATE_FORMAT) )).all()
