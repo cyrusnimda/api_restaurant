@@ -1,7 +1,6 @@
 import click
 from api.models import db, UserRole, User, Table, Booking
 from api.main import app
-from flask import Flask
 from datetime import datetime
 import bcrypt
 import unittest
@@ -9,6 +8,10 @@ import unittest
 @click.group()
 def cli():
     pass
+
+@cli.command()
+def run_api():
+    app.run()
 
 @cli.command()
 def run_tests():

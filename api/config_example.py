@@ -1,9 +1,11 @@
+# copy this file as config.py and edit database info, etc.
 
 class BaseConfig(object):
     SECRET_KEY='Please_change_this_secret_key_398473723'
     SQLALCHEMY_DATABASE_URI='mysql://username:password@server/db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DATE_FORMAT = "%Y-%m-%d %H:%M"
+    PORT = 8080
 
 
 class TestConfig(BaseConfig):

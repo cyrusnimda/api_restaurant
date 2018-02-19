@@ -77,6 +77,11 @@ class BaseTestCase(TestCase):
         booking = Booking(creator=josu, persons=5, booked_at=datetime.strptime("2018-01-01 14:00", self.app.config["DATE_FORMAT"]) )
         booking.tables.append(table1)
         booking.tables.append(table2)
+
+        booking2 = Booking(creator=josu, persons=2, booked_at=datetime.strptime("2018-01-01 13:30", self.app.config["DATE_FORMAT"]) )
+        booking2.tables.append(table5)
+
         with self.app.app_context():
             db.session.add(booking)
+            db.session.add(booking2)
             db.session.commit()

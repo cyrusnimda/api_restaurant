@@ -25,13 +25,16 @@ class BookingControllerTests(BaseTestCase):
         response = self.client.get("/bookings?date=2018-1-1 14:00", headers=self.headers)
         json_response = json.loads(response.data)
         self.assert200(response)
-        self.assertEqual(len(json_response["bookings"]), 1)
-
 
         response = self.client.get("/bookings?date=2018-01-01 14:00", headers=self.headers)
         json_response = json.loads(response.data)
         self.assert200(response)
-        self.assertEqual(len(json_response["bookings"]), 1)
+
+    def test_number_of_bookings(self):
+        self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
+        response = self.client.get("/bookings?date=2018-1-1 14:00", headers=self.headers)
+        json_response = json.loads(response.data)
+        self.assertEqual(len(json_response["bookings"]), 2)
 
     def test_get_best_tables(self):
         with self.app.app_context():
