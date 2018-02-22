@@ -1,17 +1,29 @@
 from flask import Flask, jsonify, request
 from datetime import datetime, timedelta
-from models import db, User, Table, Booking
-from controllers import BookingController
+from .models import db, User, Table, Booking
+from .controllers import BookingController
 from functools import wraps
-from models_schemas import ma, tables_schema, table_schema, users_schema, user_schema, booking_schema, bookings_schema
+from .models_schemas import ma, tables_schema, table_schema, users_schema, user_schema, booking_schema, bookings_schema
 import bcrypt
 import jwt
-from config import DevelopmentConfig
+from .config import DevelopmentConfig, ProductionConfig
+import os
+import sys
+
+# Check enviroment value
+enviroment_mode = os.getenv('SERVER_ENV', None)
+if not enviroment_mode:
+    print("SERVER_ENV value is missing, please create one first.")
+    sys.exit(0)
+
+if enviroment_mode not in ["Production", "Development"]:
+    print ("SERVER_ENV value is invalid.")
+    sys.exit(0)
+
 
 app = Flask(__name__)
-
-# Load config file
-app.config.from_object(DevelopmentConfig)
+env_object = globals()[enviroment_mode + "Config"]
+app.config.from_object(env_object)
 
 # Load database model
 db.init_app(app)
@@ -212,10 +224,10 @@ def login():
     if not user:
         return jsonify({'message': 'User or Password incorrect.'}), 401
 
-    password = req_data["password"].encode('utf-8')
-    hashed = user.password.encode('utf-8')
+    password = bytes(req_data["password"], 'utf-8')
+    hashed = bytes(user.password, 'utf-8')
     if bcrypt.checkpw(password, hashed):
-        token = jwt.encode({'username' : user.username, 'exp' : datetime.utcnow() + timedelta(minutes=30)}, app.config['SECRET_KEY'])
+        token = jwt.encode({'username' : user.username, 'exp' : datetime.utcnow() + timedelta(minutes=30)}, app.config['SECRET_KEY']).decode('utf-8')
         return jsonify({'token' : token})
 
     return jsonify({'message': 'User or Password incorrect.'}), 401

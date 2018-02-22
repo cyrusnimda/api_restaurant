@@ -18,7 +18,7 @@ class RoutesTests(BaseTestCase):
         response = self.client.post("/login",
                               data=json.dumps(data),
                               content_type='application/json')
-        json_response = json.loads(response.data)
+        json_response = json.loads(response.data.decode('utf-8'))
         message = json_response["message"]
         self.assertEqual("User or Password incorrect.", message)
 
@@ -28,7 +28,7 @@ class RoutesTests(BaseTestCase):
         response = self.client.post("/login",
                               data=json.dumps(data),
                               content_type='application/json')
-        json_response = json.loads(response.data)
+        json_response = json.loads(response.data.decode('utf-8'))
         self.assert200(response)
         self.assertIn("token", json_response)
 

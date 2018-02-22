@@ -16,7 +16,8 @@ class BaseTestCase(TestCase):
         response = self.client.post("/login",
                               data=json.dumps(data),
                               content_type='application/json')
-        json_response = json.loads(response.data)
+        json_response = json.loads(response.data.decode('utf-8'))
+
         return json_response["token"];
 
     def create_app(self):
@@ -42,14 +43,15 @@ class BaseTestCase(TestCase):
             db.session.add(manager)
             db.session.add(employee)
             db.session.add(customer)
-            db.session.commit()
 
-        josu = User(name='Josu Ruiz', username='josu', password=bcrypt.hashpw('josupass', bcrypt.gensalt()), role=admin)
-        maria = User(name='Maria Lopez', username='maria', password=bcrypt.hashpw('mariapass', bcrypt.gensalt()), role=customer)
+        josu_bcrypt_pass = bcrypt.hashpw(b'josupass', bcrypt.gensalt()).decode('utf-8')
+        josu = User(name='Josu Ruiz', username='josu', password=josu_bcrypt_pass, role=admin)
+        maria = User(name='Maria Lopez', username='maria', password=bcrypt.hashpw(b'mariapass', bcrypt.gensalt()).decode('utf-8'), role=customer)
         with self.app.app_context():
             db.session.add(josu)
             db.session.add(maria)
             db.session.commit()
+        
 
         table1 = Table(desc='Table closest to front door', seats=4)
         table2 = Table(desc='Table number 2', seats=2)

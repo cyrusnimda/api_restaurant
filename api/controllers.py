@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from models import Table, Booking
+from .models import Table, Booking
 
 class BookingController():
     DATE_FORMAT = "%Y-%m-%d %H:%M"
@@ -24,7 +24,7 @@ class BookingController():
         @return List best_tables.
     """
     def get_best_tables_for_a_booking(self, tables, booking):
-        persons = booking.persons
+        persons = int(booking.persons)
         best_tables, persons_left = self._get_best_table(tables, persons, [])
 
         return (None if persons_left > 0 else best_tables)
