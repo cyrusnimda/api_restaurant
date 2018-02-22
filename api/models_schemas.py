@@ -1,5 +1,5 @@
 from flask_marshmallow import Marshmallow
-from models import User, Table, Booking
+from .models import User, Table, Booking
 
 ma = Marshmallow()
 

@@ -20,12 +20,12 @@ def run_tests():
 
 @cli.command()
 def init_database():
-    print "Creating database with demo data..."
+    print ("Creating database with demo data...")
     db.init_app(app)
 
     with app.app_context():
         db.create_all()
-    print "Database models created."
+    print ("Database models created.")
 
     admin = UserRole(name='Admin', desc='App admin')
     manager = UserRole(name='Manager', desc='Restaurant manager')
@@ -75,7 +75,7 @@ def init_database():
         db.session.add(booking)
 
         db.session.commit()
-    print "Init data created in database"
+    print ("Init data created in database")
 
 if __name__ == '__main__':
     cli()

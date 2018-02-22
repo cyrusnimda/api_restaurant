@@ -23,6 +23,10 @@ class UserTests(BaseTestCase):
         response = self.client.get("/users/me", headers=self.headers)
         self.assert200(response)
 
+        self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token('maria','mariapass')}
+        response = self.client.get("/users/me", headers=self.headers)
+        self.assert200(response)
+
     def test_see_current_user(self):
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         response = self.client.get("/users/1", headers=self.headers)
