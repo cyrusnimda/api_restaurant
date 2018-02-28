@@ -11,7 +11,7 @@ def cli():
 
 @cli.command()
 def run_api():
-    app.run()
+    app.run(port=app.config["PORT"])
 
 @cli.command()
 def run_tests():
