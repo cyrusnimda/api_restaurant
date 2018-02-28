@@ -106,6 +106,25 @@ class RoutesTests(BaseTestCase):
                               content_type='application/json')
         self.assert200(response)
 
+    def test_post_error_persons_integer(self):
+        data = {
+            'persons': 'a',
+            'date': '2018-01-30 17:00'
+        }
+        response = self.client.post("/bookings",
+                              data=json.dumps(data),
+                              content_type='application/json')
+        self.assert400(response)
+
+        data = {
+            'persons': 0,
+            'date': '2018-01-30 17:00'
+        }
+        response = self.client.post("/bookings",
+                              data=json.dumps(data),
+                              content_type='application/json')
+        self.assert400(response)
+
     def test_post_error_persons_route(self):
         data = {
             'persons': 24,
