@@ -66,7 +66,12 @@ def check_mandatory_parameters(mandatory_parameters):
                     return jsonify( { 'message': '"{}" is a mandatory parameter.'.format(parameter) } ), 400
 
             if "persons" in mandatory_parameters:
-                if not (1 <= int(req_data["persons"]) <= 20):
+                try:
+                    persons = int(req_data["persons"])
+                except:
+                    return jsonify( { 'message': 'Invalid persons number.' } ), 400
+                    
+                if not (1 <= persons <= 20):
                     return jsonify( { 'message': 'We do not book for more than 20 persons.' } ), 400
 
             if "date" in mandatory_parameters:
