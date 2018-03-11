@@ -5,7 +5,7 @@ COPY  . /code
 WORKDIR /code
 RUN pip3 install -r requirements.txt
 
-EXPOSE 5000
+EXPOSE 8080
 
 CMD ["python", "console.py", "run_api"]
-#CMD ["/usr/local/bin/gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--access-logfile", "/var/log/api_restaurant.log", "api.main:app"]
+#CMD ["/usr/local/bin/gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "--access-logfile", "/var/log/api_restaurant.log", "api.main:app"]
