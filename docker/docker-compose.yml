@@ -1,0 +1,33 @@
+version: "3"
+
+volumes:
+    mysql57_volume:
+
+services:
+    mysql:
+        image: "mysql:5.7"
+        container_name: mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: Cyrusnimda1
+            MYSQL_DATABASE: api_restaurant
+        ports:
+            - 3306:3306
+        volumes:
+            - mysql57_volume:/var/lib/mysql
+        restart: always
+
+    api:
+        build: .
+        container_name: api_restaurant
+        ports:
+            - 80:80
+            - 443:443
+        volumes:
+            - ../:/var/www/html/
+            - ./ssl-cert-snakeoil.pem:/etc/letsencrypt/live/cyrusnimda.com/fullchain.pem
+            - ./ssl-cert-snakeoil.key:/etc/letsencrypt/live/cyrusnimda.com/privkey.pem
+        links:
+            - mysql
+        depends_on:
+            - mysql
+        restart: always
