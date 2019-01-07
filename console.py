@@ -38,8 +38,8 @@ def init_database():
         db.session.add(customer)
         db.session.commit()
 
-    josu = User(name='Josu Ruiz', username='josu', password=bcrypt.hashpw('josu1$pass', bcrypt.gensalt()), role=admin)
-    maria = User(name='Maria Lopez', username='maria', password=bcrypt.hashpw('maria1$pass', bcrypt.gensalt()), role=customer)
+    josu = User(name='Josu Ruiz', username='josu', password=bcrypt.hashpw(u'josu1$pass'.encode('utf8'), bcrypt.gensalt()), role=admin)
+    maria = User(name='Maria Lopez', username='maria', password=bcrypt.hashpw(u'maria1$pass'.encode('utf8'), bcrypt.gensalt()), role=customer)
     with app.app_context():
         db.session.add(josu)
         db.session.add(maria)

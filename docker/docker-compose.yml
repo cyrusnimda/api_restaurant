@@ -16,16 +16,27 @@ services:
             - mysql57_volume:/var/lib/mysql
         restart: always
 
-    api:
-        build: .
-        container_name: api_restaurant
+    nginx:
+        image: "nginx:1.15"
+        container_name: nginx
         ports:
             - 80:80
             - 443:443
+        links:
+            - gunicorn
         volumes:
-            - ../:/var/www/html/
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
             - ./ssl-cert-snakeoil.pem:/etc/letsencrypt/live/cyrusnimda.com/fullchain.pem
             - ./ssl-cert-snakeoil.key:/etc/letsencrypt/live/cyrusnimda.com/privkey.pem
+        restart: always
+
+    gunicorn:
+        build: .
+        container_name: gunicorn
+        ports:
+            - 5000:5000
+        volumes:
+            - ../:/var/www/html/
         links:
             - mysql
         depends_on:

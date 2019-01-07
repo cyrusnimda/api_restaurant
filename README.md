@@ -32,16 +32,16 @@ This is just an example of things that can be done with flask.
 
 ## Installation
 
-    pip install -r requeriments;
+    pip3 install -r requeriments;
     cp api/config_example.py api/config.py
 
 edit config file with database info(mysql or another one.)
 
-    python console.py init_database
-    python api/main.py
+    python3 console.py init-database
+    python3 api/main.py
 
 ## Tests
 
 All tests have a clean database totally isolated than the production one.
 
-    python console.py run_tests
+    python3 console.py run_tests
