@@ -1,0 +1,44 @@
+version: "3"
+
+volumes:
+    mysql57_volume:
+
+services:
+    mysql:
+        image: "mysql:5.7"
+        container_name: mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: Cyrusnimda1
+            MYSQL_DATABASE: api_restaurant
+        ports:
+            - 3306:3306
+        volumes:
+            - mysql57_volume:/var/lib/mysql
+        restart: always
+
+    nginx:
+        image: "nginx:1.15"
+        container_name: nginx
+        ports:
+            - 80:80
+            - 443:443
+        links:
+            - gunicorn
+        volumes:
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
+            - ./ssl-cert-snakeoil.pem:/etc/letsencrypt/live/cyrusnimda.com/fullchain.pem
+            - ./ssl-cert-snakeoil.key:/etc/letsencrypt/live/cyrusnimda.com/privkey.pem
+        restart: always
+
+    gunicorn:
+        build: .
+        container_name: gunicorn
+        ports:
+            - 5000:5000
+        volumes:
+            - ../:/var/www/html/
+        links:
+            - mysql
+        depends_on:
+            - mysql
+        restart: always

@@ -1,3 +1,4 @@
+# pip3 install -r requirements.txt
 Flask
 Flask-SQLAlchemy
 click
@@ -8,3 +9,4 @@ bcrypt
 pyjwt
 Flask-Testing
 mysqlclient
+gunicorn
