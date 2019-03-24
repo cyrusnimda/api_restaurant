@@ -23,16 +23,17 @@ services:
             - 80:80
             - 443:443
         links:
-            - gunicorn
+            - gunicorn_api
         volumes:
             - ./nginx.conf:/etc/nginx/conf.d/default.conf
             - /etc/letsencrypt/live/cyrusnimda.com/fullchain.pem:/etc/letsencrypt/live/cyrusnimda.com/fullchain.pem
             - /etc/letsencrypt/live/cyrusnimda.com/privkey.pem:/etc/letsencrypt/live/cyrusnimda.com/privkey.pem
+            - /var/www/static:/var/www/static
         restart: always
 
-    gunicorn:
+    gunicorn_api:
         build: .
-        container_name: gunicorn
+        container_name: gunicorn_api
         ports:
             - 5000:5000
         volumes:
