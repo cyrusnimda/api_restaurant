@@ -1,5 +1,5 @@
 import unittest
-from base import BaseTestCase
+from tests.base import BaseTestCase
 import json
 
 class RoutesTests(BaseTestCase):
@@ -54,6 +54,10 @@ class RoutesTests(BaseTestCase):
         response = self.client.get("/bookings?date=2018-1-1 12:12", headers=self.headers)
         self.assert400(response)
 
+        # Not in BOOKING_HOURS config
+        response = self.client.get("/bookings?date=2018-01-01 10:00", headers=self.headers)
+        self.assert400(response)
+
         response = self.client.get("/bookings?date=2018-1-1 12:12:00", headers=self.headers)
         self.assert400(response)
 
@@ -78,7 +82,7 @@ class RoutesTests(BaseTestCase):
                               content_type='application/json')
         self.assert400(response)
 
-        data = {'date': '2018-01-30 17:00'}
+        data = {'date': '2018-01-30 19:00'}
         response = self.client.post("/bookings",
                               data=json.dumps(data),
                               content_type='application/json')
@@ -88,7 +92,7 @@ class RoutesTests(BaseTestCase):
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 1,
-            'date': '2028-01-30 17:00'
+            'date': '2028-01-30 19:00'
         }
         response = self.client.post("/bookings",
                               headers=self.headers,
@@ -98,7 +102,7 @@ class RoutesTests(BaseTestCase):
 
         data = {
             'persons': '20',
-            'date': '2028-01-30 17:00'
+            'date': '2028-01-30 19:00'
         }
         response = self.client.post("/bookings",
                               data=json.dumps(data),
@@ -109,7 +113,7 @@ class RoutesTests(BaseTestCase):
     def test_post_error_persons_integer(self):
         data = {
             'persons': 'a',
-            'date': '2018-01-30 17:00'
+            'date': '2018-01-30 19:00'
         }
         response = self.client.post("/bookings",
                               data=json.dumps(data),
@@ -118,7 +122,7 @@ class RoutesTests(BaseTestCase):
 
         data = {
             'persons': 0,
-            'date': '2018-01-30 17:00'
+            'date': '2018-01-30 19:00'
         }
         response = self.client.post("/bookings",
                               data=json.dumps(data),
@@ -128,7 +132,7 @@ class RoutesTests(BaseTestCase):
     def test_post_error_persons_route(self):
         data = {
             'persons': 24,
-            'date': '2018-01-30 17:00'
+            'date': '2018-01-30 19:00'
         }
         response = self.client.post("/bookings",
                               data=json.dumps(data),
@@ -137,7 +141,7 @@ class RoutesTests(BaseTestCase):
 
         data = {
             'persons': 0,
-            'date': '2018-01-30 17:00'
+            'date': '2018-01-30 19:00'
         }
         response = self.client.post("/bookings",
                               data=json.dumps(data),
@@ -147,7 +151,7 @@ class RoutesTests(BaseTestCase):
     def test_post_error_date_past(self):
         data = {
             'persons': 1,
-            'date': '2015-01-30 17:00'
+            'date': '2015-01-30 19:00'
         }
         response = self.client.post("/bookings",
                               data=json.dumps(data),
@@ -157,7 +161,7 @@ class RoutesTests(BaseTestCase):
     def test_post_error_date_format(self):
         data = {
             'persons': 4,
-            'date': '2018-01-30 17:00:00'
+            'date': '2018-01-30 17:00'
         }
         response = self.client.post("/bookings",
                               data=json.dumps(data),
@@ -166,7 +170,16 @@ class RoutesTests(BaseTestCase):
 
         data = {
             'persons': 4,
-            'date': '2018-01-30 17:23'
+            'date': '2018-01-30 19:00:00'
+        }
+        response = self.client.post("/bookings",
+                              data=json.dumps(data),
+                              content_type='application/json')
+        self.assert400(response)
+
+        data = {
+            'persons': 4,
+            'date': '2018-01-30 19:23'
         }
         response = self.client.post("/bookings",
                               data=json.dumps(data),

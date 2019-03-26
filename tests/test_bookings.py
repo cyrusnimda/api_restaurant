@@ -1,5 +1,5 @@
 import unittest
-from base import BaseTestCase
+from tests.base import BaseTestCase
 import json
 from api.models import db, Table, Booking, User, UserRole
 from api.controllers import BookingController
