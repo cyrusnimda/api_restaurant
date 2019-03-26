@@ -6,7 +6,11 @@ class BaseConfig(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DATE_FORMAT = "%Y-%m-%d %H:%M"
     PORT = 8080
-
+    BOOKING_HOURS = [
+        '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', 
+        '19:00', '19:30', '20:00', '20:30', '21:00', '21:30',
+        '22:00'
+        ]
 
 class TestConfig(BaseConfig):
     TESTING = True

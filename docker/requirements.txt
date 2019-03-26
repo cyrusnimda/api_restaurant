@@ -10,3 +10,4 @@ pyjwt
 Flask-Testing
 mysqlclient
 gunicorn
+Flask-Migrate

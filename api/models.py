@@ -34,8 +34,10 @@ class Table(db.Model):
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     booked_at = db.Column(db.DateTime)
-    tables = db.relationship('Table', secondary=booking_tables, lazy='subquery')
     persons = db.Column(db.Integer)
     booked_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    creator = db.relationship("User", back_populates="bookings")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    name = db.Column(db.String(50))
+    
+    tables = db.relationship('Table', secondary=booking_tables, lazy='subquery')
+    creator = db.relationship("User", back_populates="bookings")

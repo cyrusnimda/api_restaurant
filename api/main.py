@@ -9,6 +9,7 @@ import jwt
 from .config import DevelopmentConfig, ProductionConfig
 import os
 import sys
+from flask_migrate import Migrate
 
 # Check enviroment value
 enviroment_mode = os.getenv('SERVER_ENV', None)
@@ -28,6 +29,7 @@ app.config.from_object(env_object)
 # Load database model
 db.init_app(app)
 ma.init_app(app)
+migrate = Migrate(app, db)
 
 def token_required(role_needed = None):
     def token_real_decorator(f):
@@ -80,9 +82,14 @@ def check_mandatory_parameters(mandatory_parameters):
                 except:
                     return jsonify({'message': "Date is not valid (YYYY-mm-dd hh:mm)."}), 400
 
+                #We only accpet booking in BOOKING_HOURS setting var
+                hour = bookingDate.strftime("%H:%M")
+                if hour not in app.config["BOOKING_HOURS"]:
+                    return jsonify({'message': "We only accept bookings in some hours."}), 400
+
                 # We only accept bookings from oclock or half hours.
                 minutes = bookingDate.strftime("%M")
-                if(minutes not in ["00", "30"]):
+                if minutes not in ["00", "30"]:
                     return jsonify({'message': "Bookings are accepted only from o'clock or half hours"}), 400
 
                 # We do not accept bookings in the past.
