@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from .models import Table, Booking
+from .models import Table, Booking, db
 
 class BookingController():
     DATE_FORMAT = "%Y-%m-%d %H:%M"
@@ -70,3 +70,17 @@ class BookingController():
 
     def get_bookings_from_exact_date(self, bookingDate):
         return Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime(self.DATE_FORMAT) )).all()
+
+    def save_booking(self, booking):
+        # Get free tables
+        free_tables = self.get_free_tables(booking)
+
+        # Get bets tables for this booking.
+        best_tables = self.get_best_tables_for_a_booking(free_tables, booking)
+        if None == best_tables:
+            raise Exception("There are not that many tables availables")
+
+        for table in best_tables:
+            booking.tables.append(table)
+        db.session.add(booking)
+        db.session.commit()

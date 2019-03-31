@@ -41,3 +41,88 @@ class Booking(db.Model):
     
     tables = db.relationship('Table', secondary=booking_tables, lazy='subquery')
     creator = db.relationship("User", back_populates="bookings")
+
+class Validation():
+    def validate(self):
+        print("Validating...")
+
+class PersonsNumberValidation(Validation):
+    def __init__(self, stringPersonsNumber):
+        self.stringPersonsNumber = stringPersonsNumber
+        self.convert_to_object()
+
+    def convert_to_object(self):
+        try:
+            self.persons = int(self.stringPersonsNumber)
+        except:
+            raise ValueError('Invalid persons number.')
+    
+    def validate(self):
+        if not (1 <= self.persons <= 20):
+            raise ValueError('We do not book for more than 20 persons.')
+        return True
+
+class DateBaseValidation(Validation):
+    date = None
+
+    def __init__(self, stringDate, config):
+        self.stringDate = stringDate
+        self.config = config
+        self.convert_to_object()
+
+    def validate(self, validatePastRule = False):
+        self.check_oclock_rule()
+        if validatePastRule:
+            self.check_past_rule()
+        return True
+
+    def convert_to_object(self):
+        print("Converting StringDate in DateObject...")
+    
+    def check_past_rule(self):
+        # We do not accept bookings in the past.
+        if datetime.now() > self.date:
+            raise ValueError('We do not accept past dates.')
+    
+    def check_oclock_rule(self):
+        #We only accept booking in BOOKING_HOURS setting var
+        hour = self.date.strftime("%H:%M")
+        # 00:00 means is a whole day date, not need for checking hours.
+        if hour != "00:00" and hour not in self.config["BOOKING_HOURS"]:
+            raise ValueError('We only accept bookings in some hours.')
+
+# Date format validation "2018-01-01"
+class DateValidation(DateBaseValidation):
+    def convert_to_object(self):
+        try:
+            self.date = datetime.strptime(self.stringDate, "%Y-%m-%d")
+        except:
+            raise ValueError('Date is not valid (YYYY-mm-dd hh:mm).')
+
+# Datetime format validation "2018-01-01 12:25"
+class DateTimeValidation(DateBaseValidation):
+    def convert_to_object(self):
+        try:
+            self.date = datetime.strptime(self.stringDate, self.config["DATE_FORMAT"])
+        except:
+            raise ValueError('Date is not valid (YYYY-mm-dd hh:mm).')
+
+# Some requests accept both formats, date and datetime, so we need to validate 
+# For both of them.
+class DateUnknownTypeValidation(DateBaseValidation):
+    def convert_to_object(self):
+        try:
+            self.date = datetime.strptime(self.stringDate, "%Y-%m-%d")
+        except:
+            try:
+                self.date = datetime.strptime(self.stringDate, self.config["DATE_FORMAT"])
+            except:
+                ValueError('Date format is not valid.')
+            
+
+    
+    
+    
+
+
+                

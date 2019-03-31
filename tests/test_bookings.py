@@ -22,10 +22,10 @@ class BookingControllerTests(BaseTestCase):
 
     def test_get_correct_date(self):
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
-        response = self.client.get("/bookings?date=2018-1-1 14:00", headers=self.headers)
+        response = self.client.get("/bookings?date=2218-1-1 14:00", headers=self.headers)
         self.assert200(response)
 
-        response = self.client.get("/bookings?date=2018-01-01 14:00", headers=self.headers)
+        response = self.client.get("/bookings?date=2218-01-01 14:00", headers=self.headers)
         self.assert200(response)
 
     def test_number_of_bookings(self):

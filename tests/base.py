@@ -8,8 +8,6 @@ import bcrypt
 import json
 
 class BaseTestCase(TestCase):
-
-
     def get_token(self, user='josu', password='josupass'):
         data = {'username': user,
                 'password': password}

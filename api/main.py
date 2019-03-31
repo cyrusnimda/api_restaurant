@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from datetime import datetime, timedelta
-from .models import db, User, Table, Booking
+from api.models import db, User, Table, Booking
+from api.models import DateValidation, DateTimeValidation, DateUnknownTypeValidation, PersonsNumberValidation
 from .controllers import BookingController
 from functools import wraps
 from .models_schemas import ma, tables_schema, table_schema, users_schema, user_schema, booking_schema, bookings_schema
@@ -66,36 +67,7 @@ def check_mandatory_parameters(mandatory_parameters):
             for parameter in mandatory_parameters:
                 if parameter not in req_data:
                     return jsonify( { 'message': '"{}" is a mandatory parameter.'.format(parameter) } ), 400
-
-            if "persons" in mandatory_parameters:
-                try:
-                    persons = int(req_data["persons"])
-                except:
-                    return jsonify( { 'message': 'Invalid persons number.' } ), 400
-                    
-                if not (1 <= persons <= 20):
-                    return jsonify( { 'message': 'We do not book for more than 20 persons.' } ), 400
-
-            if "date" in mandatory_parameters:
-                try:
-                    bookingDate = datetime.strptime(req_data["date"], app.config["DATE_FORMAT"])
-                except:
-                    return jsonify({'message': "Date is not valid (YYYY-mm-dd hh:mm)."}), 400
-
-                #We only accpet booking in BOOKING_HOURS setting var
-                hour = bookingDate.strftime("%H:%M")
-                if hour not in app.config["BOOKING_HOURS"]:
-                    return jsonify({'message': "We only accept bookings in some hours."}), 400
-
-                # We only accept bookings from oclock or half hours.
-                minutes = bookingDate.strftime("%M")
-                if minutes not in ["00", "30"]:
-                    return jsonify({'message': "Bookings are accepted only from o'clock or half hours"}), 400
-
-                # We do not accept bookings in the past.
-                if request.method == 'POST' and datetime.now() > bookingDate:
-                    return jsonify({'message': "We do not accept past dates"}), 400
-
+            
             return original_function(*args, **kwargs)
         return wrapper_function
     return real_decorator
@@ -143,28 +115,18 @@ def get_table_id(table_id):
     table = Table.query.get_or_404(table_id)
     return table_schema.jsonify(table)
 
-@app.route('/bookings/today')
-@token_required()
-def get_today_bookings(current_user):
-    bookingManager = BookingController()
-
-    bookings = bookingManager.get_bookings_today()
-    bookedTables = bookingManager.get_booked_tables(bookings)
-    bookings_json = bookings_schema.dump(bookings).data
-
-    return jsonify(
-        {
-            'bookings': bookings_json,
-            'totalTables': Table.query.count(),
-            'bookedTables': bookedTables
-        }
-    )
-
 @app.route('/bookings')
 @token_required()
 @check_mandatory_parameters(["date"])
 def get_bookings(current_user):
-    bookingDate = datetime.strptime(request.args.get('date'), app.config["DATE_FORMAT"])
+    try:
+        dateValidator = DateUnknownTypeValidation(request.args.get('date'), app.config)
+        dateValidator.validate()
+        bookingDate = dateValidator.date
+    except Exception  as e:
+        return jsonify( { 'message': str(e) } ), 400
+
+    
     bookingManager = BookingController()
 
     bookings = bookingManager.get_bookings_from_date(bookingDate)
@@ -201,24 +163,27 @@ def remove_booking_id(current_user, booking_id):
 def create_booking(current_user):
     req_data = request.get_json(force=True)
 
+    # We accept datetime format only
+    try:
+        dateValidator = DateTimeValidation(req_data["date"], app.config)
+        dateValidator.validate(validatePastRule = True)
+        bookingDate = dateValidator.date
+
+        personsValidator = PersonsNumberValidation(req_data["persons"])
+        personsValidator.validate()
+        persons = personsValidator.persons
+    except Exception  as e:
+        return jsonify( { 'message': str(e) } ), 400
+
     # Create the booking object, without tables.
-    bookingDate = datetime.strptime(req_data["date"], app.config["DATE_FORMAT"])
-    booking = Booking(creator=current_user, persons=req_data["persons"], booked_at=bookingDate )
+    booking = Booking(creator=current_user, persons=persons, booked_at=bookingDate )
 
     bookingManager = BookingController()
-
-    # Get free tables
-    free_tables = bookingManager.get_free_tables(booking)
-
-    # Get bets tables for this booking.
-    best_tables = bookingManager.get_best_tables_for_a_booking(free_tables, booking)
-    if None == best_tables:
-        return jsonify( { 'message': 'There are not that many availables tables' } ), 400
-
-    for table in best_tables:
-        booking.tables.append(table)
-    db.session.add(booking)
-    db.session.commit()
+    try:
+        bookingManager.save_booking(booking)
+    except Exception  as e:
+        print(str(e))
+        return jsonify( { 'message': str(e) } ), 400
 
     return jsonify(
         {
