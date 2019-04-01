@@ -126,11 +126,8 @@ def get_bookings(current_user):
     except Exception  as e:
         return jsonify( { 'message': str(e) } ), 400
 
-    
     bookingManager = BookingController()
-
     bookings = bookingManager.get_bookings_from_date(bookingDate)
-    bookedTables = bookingManager.get_booked_tables(bookings)
     bookings_json = bookings_schema.dump(bookings).data
 
     return jsonify(
@@ -138,7 +135,6 @@ def get_bookings(current_user):
             'date': bookingDate.strftime(app.config["DATE_FORMAT"]),
             'bookings': bookings_json,
             'totalTables': Table.query.count(),
-            'bookedTables': bookedTables,
             'current_user': current_user.name
         }
     )
@@ -182,7 +178,6 @@ def create_booking(current_user):
     try:
         bookingManager.save_booking(booking)
     except Exception  as e:
-        print(str(e))
         return jsonify( { 'message': str(e) } ), 400
 
     return jsonify(

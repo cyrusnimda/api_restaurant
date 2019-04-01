@@ -49,6 +49,8 @@ class UserTests(BaseTestCase):
         response = self.client.get("/users/2", headers=self.headers)
         self.assert404(response)
 
+        self.restart_database()
+
     def test_delete_user_no_admin(self):
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token('maria','mariapass')}
         response = self.client.delete("/users/2", headers=self.headers)

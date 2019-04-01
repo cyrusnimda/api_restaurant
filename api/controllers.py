@@ -30,24 +30,19 @@ class BookingController():
         return (None if persons_left > 0 else best_tables)
 
     def get_bookings_from_date(self, bookingDate):
-        # Booking are for 1 hour, so we need to check 30 minutes before
-        # or after to check if these tables are available.
-        bookingDateStart = bookingDate - timedelta(minutes = 30)
-        bookingDateEnd = bookingDate + timedelta(minutes = 30)
+        hour = bookingDate.strftime("%H:%M")
+        if hour != "00:00":
+            # It is a whole day date.
+            bookingDateStart = bookingDate.replace(hour=9, minute=00)
+            bookingDateEnd = bookingDate.replace(hour=23, minute=00)
+        else:
+            # Booking are for 1 hour, so we need to check 30 minutes before
+            # or after to check if these tables are available.
+            bookingDateStart = bookingDate - timedelta(minutes = 30)
+            bookingDateEnd = bookingDate + timedelta(minutes = 30)
         bookings = Booking.query.filter(Booking.booked_at >= bookingDateStart.strftime(self.DATE_FORMAT),
-                                        Booking.booked_at <= bookingDateEnd.strftime(self.DATE_FORMAT)
-                                        ).all()
-        return bookings
-
-    def get_bookings_today(self):
-        bookingDateStart = datetime.now()
-        bookingDateStart = bookingDateStart.replace(hour=9, minute=00)
-
-        bookingDateEnd = datetime.now()
-        bookingDateEnd = bookingDateEnd.replace(hour=23, minute=00)
-        bookings = Booking.query.filter(Booking.booked_at >= bookingDateStart.strftime(self.DATE_FORMAT),
-                                        Booking.booked_at <= bookingDateEnd.strftime(self.DATE_FORMAT)
-                                        ).all()
+                                            Booking.booked_at <= bookingDateEnd.strftime(self.DATE_FORMAT)
+                                            ).all()
         return bookings
 
     def get_free_tables(self, booking):
@@ -61,15 +56,6 @@ class BookingController():
                 tables.remove(ocupied_table)
 
         return tables
-
-    def get_booked_tables(self, bookings):
-        bookedTables = 0
-        for booking in bookings:
-            bookedTables = bookedTables + len(booking.tables)
-        return bookedTables
-
-    def get_bookings_from_exact_date(self, bookingDate):
-        return Booking.query.filter(Booking.booked_at.startswith( bookingDate.strftime(self.DATE_FORMAT) )).all()
 
     def save_booking(self, booking):
         # Get free tables

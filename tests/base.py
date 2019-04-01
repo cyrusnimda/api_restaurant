@@ -8,6 +8,7 @@ import bcrypt
 import json
 
 class BaseTestCase(TestCase):
+
     def get_token(self, user='josu', password='josupass'):
         data = {'username': user,
                 'password': password}
@@ -22,15 +23,21 @@ class BaseTestCase(TestCase):
         self.app = app.config.from_object(TestConfig)
         return app
 
-    def setUp(self):
-        db.create_all()
-        self.populate_db()
+    #def setUp(self):
+        #db.create_all()
+        #self.populate_db()
+        #self.asdasdasd
 
+    #def tearDown(self):
+        #db.session.remove()
+        #db.drop_all()
 
-    def tearDown(self):
+    def restart_database(self):
         db.session.remove()
         db.drop_all()
-
+        db.create_all()
+        self.populate_db()
+        
     def populate_db(self):
         admin = UserRole(name='Admin', desc='App admin')
         manager = UserRole(name='Manager', desc='Restaurant manager')

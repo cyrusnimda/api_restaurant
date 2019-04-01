@@ -17,7 +17,7 @@ class User(db.Model):
     password = db.Column(db.String(80))
     role_id = db.Column(db.Integer, db.ForeignKey('user_role.id'), nullable=False)
     role = db.relationship("UserRole", back_populates="user")
-    bookings = db.relationship('Booking', back_populates='creator')
+    bookings = db.relationship('Booking', back_populates='creator', cascade="all,delete")
 
 
 booking_tables = db.Table('booking_tables',
@@ -35,7 +35,7 @@ class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     booked_at = db.Column(db.DateTime)
     persons = db.Column(db.Integer)
-    booked_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    booked_by = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     name = db.Column(db.String(50))
     
