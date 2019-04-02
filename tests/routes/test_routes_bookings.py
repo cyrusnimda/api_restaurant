@@ -2,41 +2,14 @@ import unittest
 from tests.base import BaseTestCase
 import json
 
-class RoutesTests(BaseTestCase):
-    def test_login_get(self):
-        response = self.client.get('/login')
-        self.assert405(response)
-
-    def test_login_post(self):
-        response = self.client.post('/login')
-        self.assert400(response)
-
-    def test_database_exits(self):
-        data = {'username': 'josu',
-                'password': '*******'}
-        response = self.client.post("/login",
-                              data=json.dumps(data),
-                              content_type='application/json')
-        json_response = json.loads(response.data.decode('utf-8'))
-        message = json_response["message"]
-        self.assertEqual("User or Password incorrect.", message)
-
-    def test_login_correct(self):
-        data = {'username': 'josu',
-                'password': 'josupass'}
-        response = self.client.post("/login",
-                              data=json.dumps(data),
-                              content_type='application/json')
-        json_response = json.loads(response.data.decode('utf-8'))
-        self.assert200(response)
-        self.assertIn("token", json_response)
+class RoutesBookingsTests(BaseTestCase):
 
     def test_get_correct_date(self):
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         response = self.client.get("/bookings?date=2018-1-1 12:00", headers=self.headers)
         self.assert200(response)
 
-        response = self.client.get("/bookings?date=2018-01-01 12:00", headers=self.headers)
+        response = self.client.get("/bookings?date=2018-01-01 19:30", headers=self.headers)
         self.assert200(response)
 
         response = self.client.get("/bookings?date=2018-1-1", headers=self.headers)
@@ -85,7 +58,7 @@ class RoutesTests(BaseTestCase):
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 1,
-            'date': '2228-01-30 19:00'
+            'date': '2218-01-30 19:00'
         }
         response = self.client.post("/bookings",
                               headers=self.headers,
@@ -95,7 +68,7 @@ class RoutesTests(BaseTestCase):
 
         data = {
             'persons': '20',
-            'date': '2228-01-30 19:00'
+            'date': '2218-01-30 19:00'
         }
         response = self.client.post("/bookings",
                               data=json.dumps(data),
@@ -215,6 +188,12 @@ class RoutesTests(BaseTestCase):
         response = self.client.get("/bookings?date=2018-1-1 14:00", headers=self.headers)
         json_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(len(json_response["bookings"]), 2)
+
+        response = self.client.get("/bookings?date=2018-1-1", headers=self.headers)
+        json_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(len(json_response["bookings"]), 3)
+
+
 
 if __name__ == '__main__':
     unittest.main()

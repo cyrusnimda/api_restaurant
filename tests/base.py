@@ -37,7 +37,7 @@ class BaseTestCase(TestCase):
         db.drop_all()
         db.create_all()
         self.populate_db()
-        
+
     def populate_db(self):
         admin = UserRole(name='Admin', desc='App admin')
         manager = UserRole(name='Manager', desc='Restaurant manager')
@@ -88,7 +88,11 @@ class BaseTestCase(TestCase):
         booking2 = Booking(creator=josu, persons=2, booked_at=datetime.strptime("2018-01-01 13:30", self.app.config["DATE_FORMAT"]) )
         booking2.tables.append(table5)
 
+        booking3 = Booking(creator=josu, persons=2, booked_at=datetime.strptime("2018-01-01 19:30", self.app.config["DATE_FORMAT"]) )
+        booking3.tables.append(table5)
+
         with self.app.app_context():
             db.session.add(booking)
             db.session.add(booking2)
+            db.session.add(booking3)
             db.session.commit()

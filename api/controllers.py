@@ -31,7 +31,7 @@ class BookingController():
 
     def get_bookings_from_date(self, bookingDate):
         hour = bookingDate.strftime("%H:%M")
-        if hour != "00:00":
+        if hour == "00:00":
             # It is a whole day date.
             bookingDateStart = bookingDate.replace(hour=9, minute=00)
             bookingDateEnd = bookingDate.replace(hour=23, minute=00)
