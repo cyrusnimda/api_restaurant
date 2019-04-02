@@ -58,7 +58,8 @@ class RoutesBookingsTests(BaseTestCase):
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 1,
-            'date': '2218-01-30 19:00'
+            'date': '2218-01-30 19:00',
+            'name' : 'Paco'
         }
         response = self.client.post("/bookings",
                               headers=self.headers,
@@ -68,7 +69,8 @@ class RoutesBookingsTests(BaseTestCase):
 
         data = {
             'persons': '20',
-            'date': '2218-01-30 19:00'
+            'date': '2218-01-30 19:00',
+            'name' : 'Paco'
         }
         response = self.client.post("/bookings",
                               data=json.dumps(data),
@@ -78,8 +80,7 @@ class RoutesBookingsTests(BaseTestCase):
 
         self.restart_database()
 
-
-    def test_post_error_persons_integer(self):
+    def test_post_error_empty_name(self):
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 'a',
@@ -91,9 +92,24 @@ class RoutesBookingsTests(BaseTestCase):
                               content_type='application/json')
         self.assert400(response)
 
+
+    def test_post_error_persons_integer(self):
+        self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
+        data = {
+            'persons': 'a',
+            'date': '2218-01-30 19:00',
+            'name' : 'Paco'
+        }
+        response = self.client.post("/bookings",
+                            headers=self.headers,
+                              data=json.dumps(data),
+                              content_type='application/json')
+        self.assert400(response)
+
         data = {
             'persons': 0,
-            'date': '2218-01-30 19:00'
+            'date': '2218-01-30 19:00',
+            'name' : 'Paco'
         }
         response = self.client.post("/bookings",
                               data=json.dumps(data),
@@ -105,7 +121,8 @@ class RoutesBookingsTests(BaseTestCase):
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 24,
-            'date': '2218-01-30 19:00'
+            'date': '2218-01-30 19:00',
+            'name' : 'Paco'
         }
         response = self.client.post("/bookings",
                             headers=self.headers,
@@ -115,7 +132,8 @@ class RoutesBookingsTests(BaseTestCase):
 
         data = {
             'persons': 0,
-            'date': '2218-01-30 19:00'
+            'date': '2218-01-30 19:00',
+            'name' : 'Paco'
         }
         response = self.client.post("/bookings",
                             headers=self.headers,    
@@ -127,7 +145,8 @@ class RoutesBookingsTests(BaseTestCase):
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 1,
-            'date': '2015-01-30 19:00'
+            'date': '2015-01-30 19:00',
+            'name' : 'Paco'
         }
         response = self.client.post("/bookings",
                             headers=self.headers,
@@ -140,7 +159,8 @@ class RoutesBookingsTests(BaseTestCase):
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 4,
-            'date': '2218-01-30 17:00'
+            'date': '2218-01-30 17:00',
+            'name' : 'Paco'
         }
         response = self.client.post("/bookings",
                             headers=self.headers,
@@ -150,7 +170,8 @@ class RoutesBookingsTests(BaseTestCase):
 
         data = {
             'persons': 4,
-            'date': '2218-01-30 19:00:00'
+            'date': '2218-01-30 19:00:00',
+            'name' : 'Paco'
         }
         response = self.client.post("/bookings",
                             headers=self.headers,
@@ -160,7 +181,8 @@ class RoutesBookingsTests(BaseTestCase):
 
         data = {
             'persons': 4,
-            'date': '2218-01-30 19:23'
+            'date': '2218-01-30 19:23',
+            'name' : 'Paco'
         }
         response = self.client.post("/bookings",
                             headers=self.headers,

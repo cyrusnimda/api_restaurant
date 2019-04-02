@@ -154,7 +154,7 @@ def remove_booking_id(current_user, booking_id):
     return jsonify({'message': 'Booking deleted.'})
 
 @app.route('/bookings', methods=['POST'])
-@check_mandatory_parameters(["date", "persons"])
+@check_mandatory_parameters(["date", "persons", "name"])
 @token_required()
 def create_booking(current_user):
     req_data = request.get_json(force=True)
@@ -172,7 +172,7 @@ def create_booking(current_user):
         return jsonify( { 'message': str(e) } ), 400
 
     # Create the booking object, without tables.
-    booking = Booking(creator=current_user, persons=persons, booked_at=bookingDate )
+    booking = Booking(creator=current_user, persons=persons, booked_at=bookingDate, name=req_data["name"] )
 
     bookingManager = BookingController()
     try:
