@@ -23,15 +23,6 @@ class BaseTestCase(TestCase):
         self.app = app.config.from_object(TestConfig)
         return app
 
-    #def setUp(self):
-        #db.create_all()
-        #self.populate_db()
-        #self.asdasdasd
-
-    #def tearDown(self):
-        #db.session.remove()
-        #db.drop_all()
-
     def restart_database(self):
         db.session.remove()
         db.drop_all()
@@ -81,14 +72,14 @@ class BaseTestCase(TestCase):
             db.session.add(table10)
             db.session.commit()
 
-        booking = Booking(creator=josu, persons=5, booked_at=datetime.strptime("2018-01-01 14:00", self.app.config["DATE_FORMAT"]) )
+        booking = Booking(creator=josu, persons=5, booked_at=datetime(2018, 1, 1, 14, 0) )
         booking.tables.append(table1)
         booking.tables.append(table2)
 
-        booking2 = Booking(creator=josu, persons=2, booked_at=datetime.strptime("2018-01-01 13:30", self.app.config["DATE_FORMAT"]) )
+        booking2 = Booking(creator=josu, persons=2, booked_at=datetime(2018, 1, 1, 13, 30) )
         booking2.tables.append(table5)
 
-        booking3 = Booking(creator=josu, persons=2, booked_at=datetime.strptime("2018-01-01 19:30", self.app.config["DATE_FORMAT"]) )
+        booking3 = Booking(creator=josu, persons=2, booked_at=datetime(2018, 1, 1, 19, 30) )
         booking3.tables.append(table5)
 
         with self.app.app_context():

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from .models import Table, Booking, db
 
 class BookingController():

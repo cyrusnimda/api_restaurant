@@ -1,7 +1,6 @@
 import click
 from api.models import db, UserRole, User, Table, Booking
 from api.main import app
-from datetime import datetime
 import bcrypt
 import unittest
 

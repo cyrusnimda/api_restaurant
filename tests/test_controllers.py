@@ -7,7 +7,7 @@ import copy
 class ControllerTests(unittest.TestCase):
 
     def test_get_best_tables(self):
-        self.sample_date = datetime.strptime("2018-01-30 20:00", "%Y-%m-%d %H:%M")
+        self.sample_date = datetime(2018, 1, 30, 20, 0)
 
         mock_tables = [
             Table(id=1, seats=4),
