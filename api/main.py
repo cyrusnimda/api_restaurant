@@ -43,6 +43,7 @@ def token_required(role_needed = None):
             try:
                 data = jwt.decode(token, app.config['SECRET_KEY'])
                 current_user = User.query.filter_by(username=data['username']).first()
+
                 if role_needed and role_needed != current_user.role.name:
                     return jsonify({'message': 'Permission denied.'}), 403
             except:
@@ -86,6 +87,20 @@ def get_users(current_user):
     users = User.query.all()
     return users_schema.jsonify(users)
 
+@app.route('/users/me/bookings')
+@token_required()
+def get_user_bookings(current_user):
+    bookingManager = BookingController()
+    bookings = bookingManager.get_bookings_from_user(current_user)
+    bookings_json = bookings_schema.dump(bookings).data
+
+    return jsonify(
+        {
+            'bookings': bookings_json,
+            'current_user': current_user.name
+        }
+    )
+
 @app.route('/users/<int:user_id>')
 @token_required('Admin')
 def get_user_id(current_user, user_id):
@@ -100,10 +115,14 @@ def remove_user_id(current_user, user_id):
     db.session.commit()
     return jsonify({'message': 'User deleted.'})
 
+
+
 @app.route('/users/me')
 @token_required()
 def get_user_me(current_user):
     return user_schema.jsonify(current_user)
+
+
 
 @app.route('/tables')
 def get_tables():

@@ -45,6 +45,10 @@ class BookingController():
                                             ).all()
         return bookings
 
+    def get_bookings_from_user(self, user):
+        bookings = Booking.query.filter(Booking.booked_by == user.id).all()
+        return bookings
+
     def get_free_tables(self, booking):
         bookings = self.get_bookings_from_date(booking.booked_at)
 

@@ -82,8 +82,12 @@ class BaseTestCase(TestCase):
         booking3 = Booking(creator=josu, persons=2, booked_at=datetime(2018, 1, 1, 19, 30) )
         booking3.tables.append(table5)
 
+        booking4 = Booking(creator=maria, persons=2, booked_at=datetime(2019, 1, 1, 19, 30) )
+        booking4.tables.append(table5)
+
         with self.app.app_context():
             db.session.add(booking)
             db.session.add(booking2)
             db.session.add(booking3)
+            db.session.add(booking4)
             db.session.commit()

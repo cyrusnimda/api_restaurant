@@ -1,8 +1,16 @@
-import unittest
 from tests.base import BaseTestCase
 import json
 
 class RoutesBookingsTests(BaseTestCase):
+
+    def test_get_bookings_from_user(self):
+        self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token('maria','mariapass')}
+        response = self.client.get("/users/me/bookings", headers=self.headers)
+        self.assert200(response)
+
+        json_response = json.loads(response.data.decode('utf-8'))
+        self.assertIn("bookings", json_response)
+        self.assertEqual(1, len(json_response["bookings"]))
 
     def test_get_correct_date(self):
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
