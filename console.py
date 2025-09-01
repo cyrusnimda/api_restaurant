@@ -1,6 +1,7 @@
 import click
 from api.main import app, db
 import unittest
+from api.repository import db_feeds
 
 @click.group()
 def cli():
@@ -23,6 +24,14 @@ def init_database():
     with app.app_context():
         db.create_all()
     print ("Database models created.")
+
+
+@cli.command()
+def feed_database():
+    print("Feeding database with initial data...")
+    with app.app_context():
+        db_feeds(db)
+    print("Database fed with initial data.")
 
 if __name__ == '__main__':
     cli()
