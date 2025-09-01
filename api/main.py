@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from api.models import db, User, Table, Booking
 from api.models import DateValidation, DateTimeValidation, DateUnknownTypeValidation, PersonsNumberValidation
 from .controllers import BookingController
@@ -39,9 +39,8 @@ def token_required(role_needed = None):
             if not 'x-access-token' in request.headers:
                 return jsonify({'message' : 'Token is missing!'}), 401
             token = request.headers['x-access-token']
-
             try:
-                data = jwt.decode(token, app.config['SECRET_KEY'])
+                data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
                 current_user = User.query.filter_by(username=data['username']).first()
 
                 if role_needed and role_needed != current_user.role.name:
@@ -218,7 +217,7 @@ def login():
     password = bytes(req_data["password"], 'utf-8')
     hashed = bytes(user.password, 'utf-8')
     if bcrypt.checkpw(password, hashed):
-        token = jwt.encode({'username' : user.username, 'exp' : datetime.utcnow() + timedelta(minutes=30)}, app.config['SECRET_KEY']).decode('utf-8')
+        token = jwt.encode({'username' : user.username, 'exp' : datetime.now(timezone.utc) + timedelta(minutes=30)}, app.config['SECRET_KEY'], algorithm="HS256")
         return jsonify({'token' : token})
 
     return jsonify({'message': 'User or Password incorrect.'}), 401
