@@ -42,7 +42,7 @@ class BaseTestCase(TestCase):
 
         josu_bcrypt_pass = bcrypt.hashpw(b'josupass', bcrypt.gensalt()).decode('utf-8')
         josu = User(name='Josu Ruiz', username='josu', password=josu_bcrypt_pass, role=admin)
-        maria = User(name='Maria Lopez', username='maria', password=bcrypt.hashpw(b'mariapass', bcrypt.gensalt()).decode('utf-8'), role=customer)
+        maria = User(name='Maria Ruiz', username='maria', password=bcrypt.hashpw(b'mariapass', bcrypt.gensalt()).decode('utf-8'), role=customer)
         with self.app.app_context():
             db.session.add(josu)
             db.session.add(maria)

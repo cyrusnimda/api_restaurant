@@ -1,7 +1,5 @@
 import click
-from api.models import db, UserRole, User, Table, Booking
-from api.main import app
-import bcrypt
+from api.main import app, db
 import unittest
 
 @click.group()
@@ -20,7 +18,7 @@ def run_tests():
 @cli.command()
 def init_database():
     print ("Creating database...")
-    db.init_app(app)
+    #db.init_app(app)
 
     with app.app_context():
         db.create_all()

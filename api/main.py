@@ -15,8 +15,8 @@ from flask_migrate import Migrate
 # Check enviroment value
 enviroment_mode = os.getenv('SERVER_ENV', None)
 if not enviroment_mode:
-    print("SERVER_ENV value is missing, please create one first.")
-    sys.exit(0)
+    print("SERVER_ENV value is missing, setting Development by default.")
+    enviroment_mode = "Development"
 
 if enviroment_mode not in ["Production", "Development"]:
     print ("SERVER_ENV value is invalid.")

@@ -8,6 +8,6 @@ marshmallow-sqlalchemy
 bcrypt
 pyjwt
 Flask-Testing
-mysqlclient
+PyMySQL
 gunicorn
 Flask-Migrate

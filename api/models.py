@@ -119,10 +119,3 @@ class DateUnknownTypeValidation(DateBaseValidation):
             except:
                 ValueError('Date format is not valid.')
             
-
-    
-    
-    
-
-
-                
