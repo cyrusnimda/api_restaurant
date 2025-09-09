@@ -3,6 +3,18 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
+class Restaurant(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    desc = db.Column(db.String(200))
+    address = db.Column(db.String(200))
+    phone = db.Column(db.String(20))
+    email = db.Column(db.String(50))
+    cuisine = db.Column(db.String(50))
+    review_count = db.Column(db.Integer)
+    reviews_average = db.Column(db.Float, default=0.0)
+    logo = db.Column(db.String(200))
+
 
 class UserRole(db.Model):
     id = db.Column(db.Integer, primary_key=True)

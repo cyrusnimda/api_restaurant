@@ -1,7 +1,16 @@
 from flask_marshmallow import Marshmallow
-from .models import UserRole, User, Table, Booking
+from .models import Restaurant, UserRole, User, Table, Booking
 
 ma = Marshmallow()
+
+class RestaurantSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Restaurant
+        load_instance = True
+
+restaurant_schema = RestaurantSchema()
+restaurants_schema = RestaurantSchema(many=True)
+
 
 class UserRoleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

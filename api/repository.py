@@ -1,10 +1,10 @@
-from api.models import db, Table, Booking, User, UserRole
+from api.models import Restaurant, db, Table, Booking, User, UserRole
 import bcrypt
-
+from api.feeds.restaurants import restaurants_data
 
 def db_feeds(db):
     with db.session.begin():
-        # Add initial data to the database
+        # Add Roles
         admin = UserRole(name='Admin', desc='App admin')
         manager = UserRole(name='Manager', desc='Restaurant manager')
         employee = UserRole(name='Employee', desc='Restaurant employee')
@@ -17,6 +17,7 @@ def db_feeds(db):
             db.session.add(employee)
             db.session.add(customer)
 
+        # Add users
         josu_bcrypt_pass = bcrypt.hashpw(b'josupass', bcrypt.gensalt()).decode('utf-8')
         josu = User(name='Josu Ruiz', username='josu', password=josu_bcrypt_pass, role=admin)
         maria_bcrypt_pass = bcrypt.hashpw(b'mariapass', bcrypt.gensalt()).decode('utf-8')
@@ -26,5 +27,12 @@ def db_feeds(db):
         if not josu_exists:
             db.session.add(josu)
             db.session.add(maria)
+
+        # Add restaurants
+        for r in restaurants_data:
+            exists = Restaurant.query.filter_by(name=r["name"]).first()
+            if not exists:
+                restaurant = Restaurant(**r)
+                db.session.add(restaurant)
 
         db.session.commit()

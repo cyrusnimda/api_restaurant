@@ -86,6 +86,20 @@ def page_not_found(e):
 def index():
     return jsonify({'message': "Wellcome to restaurant API."})
 
+@app.route('/restaurants')
+def get_restaurants():
+    from api.models import Restaurant
+    from api.models_schemas import restaurants_schema
+    restaurants = Restaurant.query.all()
+    return restaurants_schema.jsonify(restaurants)
+
+@app.route('/restaurants/<int:restaurant_id>')
+def get_restaurant_id(restaurant_id):
+    from api.models import Restaurant
+    from api.models_schemas import restaurant_schema
+    restaurant = Restaurant.query.get_or_404(restaurant_id)
+    return restaurant_schema.jsonify(restaurant)
+
 @app.route('/users')
 @token_required('Admin')
 def get_users(current_user):

@@ -1,0 +1,12 @@
+
+### Welcome
+GET http://localhost:8080/
+
+
+### Get all restaurants
+GET http://localhost:8080/restaurants
+
+
+
+### Get a restaurant by id
+GET http://localhost:8080/restaurants/1
