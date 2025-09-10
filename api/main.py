@@ -34,14 +34,16 @@ def create_app():
     app.register_blueprint(auth_router)
     app.register_blueprint(table_router)
 
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return jsonify({'message': 'Object not found.'}), 404
+
     return app
 
 
 if __name__ == '__main__':
     app = create_app()
 
-    @app.errorhandler(404)
-    def page_not_found(e):
-        return jsonify({'message': 'Object not found.'}), 404
+    
     
     app.run(port=app.config["PORT"])

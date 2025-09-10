@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app as app
 from api.models import User
 from api.decorators import check_mandatory_parameters
 import bcrypt

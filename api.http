@@ -1,4 +1,5 @@
 @token=postman_dev_key_1928465
+
 ### Welcome
 GET http://localhost:8080/
 
@@ -20,6 +21,10 @@ X-Access-Token: {{token}}
 GET http://localhost:8080/users
 X-Access-Token: {{token}}
 
+### Get a user by id (admin only)
+GET http://localhost:8080/users/3
+X-Access-Token: {{token}}
+
 
 ### Get my bookings
 GET http://localhost:8080/users/me/bookings
@@ -31,13 +36,36 @@ GET http://localhost:8080/tables
 
 
 ### Get a table by id
-GET http://localhost:8080/tables/1
+GET http://localhost:8080/tables/14
+
 
 ### Login
-POST http://localhost:8080/auth/login
+POST http://localhost:8080/login
 Content-Type: application/json
 
 {
-    "username": "josu",
-    "password": "josupass"
+    "username": "demo",
+    "password": "demo"
+}
+
+
+### Get bookings for a specific date
+GET http://localhost:8080/bookings?date=2024-06-20
+X-Access-Token: {{token}}
+
+
+### get a booking by id
+GET http://localhost:8080/bookings/3
+X-Access-Token: {{token}}
+
+
+### Create a booking
+POST http://localhost:8080/bookings
+X-Access-Token: {{token}}
+Content-Type: application/json
+
+{
+    "date": "2025-09-20 14:00",
+    "persons": 4,
+    "name": "John Doe"
 }

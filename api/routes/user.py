@@ -21,7 +21,7 @@ def get_users(current_user):
 def get_user_bookings(current_user):
     bookingManager = BookingController()
     bookings = bookingManager.get_bookings_from_user(current_user)
-    bookings_json = bookings_schema.dump(bookings).data
+    bookings_json = bookings_schema.dump(bookings)
 
     return jsonify(
         {

@@ -1,4 +1,4 @@
-from flask import Blueprint, app, jsonify
+from flask import Blueprint, app, jsonify, current_app as app
 from flask import request
 from api.controllers import BookingController
 from api.decorators import token_required, check_mandatory_parameters
@@ -23,7 +23,7 @@ def get_bookings(current_user):
 
     bookingManager = BookingController()
     bookings = bookingManager.get_bookings_from_date(bookingDate)
-    bookings_json = bookings_schema.dump(bookings).data
+    bookings_json = bookings_schema.dump(bookings)
 
     return jsonify(
         {
@@ -81,6 +81,6 @@ def create_booking(current_user):
     return jsonify(
         {
         'status': 'OK',
-        'booking': booking_schema.dump(booking).data
+        'booking': booking_schema.dump(booking)
         }
     )
