@@ -1,32 +1,28 @@
 from api.models import Restaurant, db, Table, Booking, User, UserRole
 import bcrypt
 from api.feeds.restaurants import restaurants_data
+from api.feeds.tables import tables_data
+from api.feeds.roles import roles_data
+from api.feeds.users import users_data
 
 def db_feeds(db):
     with db.session.begin():
         # Add Roles
-        admin = UserRole(name='Admin', desc='App admin')
-        manager = UserRole(name='Manager', desc='Restaurant manager')
-        employee = UserRole(name='Employee', desc='Restaurant employee')
-        customer = UserRole(name='Customer', desc='Restaurant customer')
-
-        admin_exists = UserRole.query.filter_by(name='Admin').first()
-        if not admin_exists:
-            db.session.add(admin)
-            db.session.add(manager)
-            db.session.add(employee)
-            db.session.add(customer)
+        for role in roles_data:
+            exists = UserRole.query.filter_by(name=role["name"]).first()
+            if not exists:
+                new_role = UserRole(**role)
+                db.session.add(new_role)
 
         # Add users
-        josu_bcrypt_pass = bcrypt.hashpw(b'josupass', bcrypt.gensalt()).decode('utf-8')
-        josu = User(name='Josu Ruiz', username='josu', password=josu_bcrypt_pass, role=admin)
-        maria_bcrypt_pass = bcrypt.hashpw(b'mariapass', bcrypt.gensalt()).decode('utf-8')
-        maria = User(name='Maria Ruiz', username='maria', password=maria_bcrypt_pass, role=customer)
+        for user in users_data:
+            exists = User.query.filter_by(username=user["username"]).first()
+            if not exists:
+                user_bcrypt_pass = bcrypt.hashpw(user["password"].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                role = UserRole.query.filter_by(id=user["role"]).first()
+                new_user = User(name=user["name"], username=user["username"], password=user_bcrypt_pass, role=role)
+                db.session.add(new_user)
 
-        josu_exists = User.query.filter_by(username='josu').first()
-        if not josu_exists:
-            db.session.add(josu)
-            db.session.add(maria)
 
         # Add restaurants
         for r in restaurants_data:
@@ -34,5 +30,12 @@ def db_feeds(db):
             if not exists:
                 restaurant = Restaurant(**r)
                 db.session.add(restaurant)
+
+        # Add tables
+        for table in tables_data:
+            exists = Table.query.filter_by(desc=table["desc"]).first()
+            if not exists:
+                new_table = Table(**table)
+                db.session.add(new_table)
 
         db.session.commit()
