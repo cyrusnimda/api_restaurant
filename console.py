@@ -1,7 +1,10 @@
 import click
-from api.main import app, db
+from api.main import create_app
+from api.models import db
 import unittest
 from api.repository import db_feeds
+
+app = create_app()
 
 @click.group()
 def cli():

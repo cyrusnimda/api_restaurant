@@ -1,4 +1,4 @@
-
+@token=postman_dev_key_1928465
 ### Welcome
 GET http://localhost:8080/
 
@@ -7,6 +7,24 @@ GET http://localhost:8080/
 GET http://localhost:8080/restaurants
 
 
-
 ### Get a restaurant by id
 GET http://localhost:8080/restaurants/1
+
+
+### Get my user`s info
+GET http://localhost:8080/users/me
+X-Access-Token: {{token}}
+
+
+### Get all users (admin only)
+GET http://localhost:8080/users
+X-Access-Token: {{token}}
+
+
+### Get my bookings
+GET http://localhost:8080/users/me/bookings
+X-Access-Token: {{token}}
+
+
+### Get all tables
+GET http://localhost:8080/tables

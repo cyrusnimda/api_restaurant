@@ -4,3 +4,4 @@ config.py
 
 # ignore the virtualenv directory
 my_env/
+.env
