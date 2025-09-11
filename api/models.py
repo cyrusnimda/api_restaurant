@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timezone
 
 db = SQLAlchemy()
 
@@ -48,7 +48,7 @@ class Booking(db.Model):
     booked_at = db.Column(db.DateTime)
     persons = db.Column(db.Integer)
     booked_by = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
     name = db.Column(db.String(50))
     
     tables = db.relationship('Table', secondary=booking_tables, lazy='subquery')

@@ -12,13 +12,16 @@ from api.routes.auth import router as auth_router
 from api.routes.table import router as table_router
 
 
-def create_app():
+def create_app(env_object = None):
     # Check enviroment value
-    enviroment_mode = os.getenv('SERVER_ENV', 'Development')
+    if env_object is None:
+        enviroment_mode = os.getenv('SERVER_ENV', 'Development')
+        env_object = globals()[enviroment_mode + "Config"]
+
 
     app = Flask(__name__)
     CORS(app)
-    env_object = globals()[enviroment_mode + "Config"]
+    
     app.config.from_object(env_object)
 
     # Load database model
@@ -44,6 +47,4 @@ def create_app():
 if __name__ == '__main__':
     app = create_app()
 
-    
-    
     app.run(port=app.config["PORT"])

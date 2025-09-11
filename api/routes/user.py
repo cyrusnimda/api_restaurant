@@ -9,7 +9,7 @@ from api.models import db, User
 router = Blueprint("user", __name__, url_prefix="/users")
 
 
-@router.route('/')
+@router.route('')
 @token_required(role_needed='Admin')
 def get_users(current_user):
     users = User.query.all()

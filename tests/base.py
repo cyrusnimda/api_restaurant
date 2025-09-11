@@ -1,6 +1,7 @@
+from functools import cache
 from flask_testing import TestCase
 
-from api.main import app
+from api.main import create_app
 from api.models import db, Table, Booking, User, UserRole
 from api.config import TestConfig
 from datetime import datetime
@@ -9,6 +10,12 @@ import json
 
 class BaseTestCase(TestCase):
 
+    def start_database(self):
+        db.init_app(self.app)
+        with self.app.app_context():
+            db.create_all()
+        self.populate_db()
+
     def get_token(self, user='josu', password='josupass'):
         data = {'username': user,
                 'password': password}
@@ -16,12 +23,17 @@ class BaseTestCase(TestCase):
                               data=json.dumps(data),
                               content_type='application/json')
         json_response = json.loads(response.data.decode('utf-8'))
-
-        return json_response["token"];
+        token = json_response["token"]
+        return token
 
     def create_app(self):
-        self.app = app.config.from_object(TestConfig)
-        return app
+        self.app = create_app(TestConfig)
+        return self.app
+    
+    def start_database(self):
+        with self.app.app_context():
+            db.create_all()
+        self.populate_db()
 
     def restart_database(self):
         db.session.remove()

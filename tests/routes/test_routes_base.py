@@ -12,6 +12,7 @@ class RoutesTests(BaseTestCase):
         self.assert400(response)
 
     def test_database_exits(self):
+        self.start_database()
         data = {'username': 'josu',
                 'password': '*******'}
         response = self.client.post("/login",
@@ -22,6 +23,7 @@ class RoutesTests(BaseTestCase):
         self.assertEqual("User or Password incorrect.", message)
 
     def test_login_correct(self):
+        self.start_database()
         data = {'username': 'josu',
                 'password': 'josupass'}
         response = self.client.post("/login",

@@ -4,6 +4,7 @@ import json
 class RoutesBookingsTests(BaseTestCase):
 
     def test_get_bookings_from_user(self):
+        self.start_database()
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token('maria','mariapass')}
         response = self.client.get("/users/me/bookings", headers=self.headers)
         self.assert200(response)
@@ -13,6 +14,7 @@ class RoutesBookingsTests(BaseTestCase):
         self.assertEqual(1, len(json_response["bookings"]))
 
     def test_get_correct_date(self):
+        self.start_database()
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         response = self.client.get("/bookings?date=2018-1-1 12:00", headers=self.headers)
         self.assert200(response)
@@ -27,6 +29,7 @@ class RoutesBookingsTests(BaseTestCase):
         self.assert200(response)
 
     def test_get_incorrect_date(self):
+        self.start_database()
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         response = self.client.get("/bookings", headers=self.headers)
         self.assert400(response)
@@ -45,11 +48,13 @@ class RoutesBookingsTests(BaseTestCase):
         self.assert400(response)
 
     def test_post_empty_booking_route(self):
+        self.start_database()
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         response = self.client.post("/bookings", headers=self.headers)
         self.assert400(response)
 
     def test_post_mandatory_parameter_missing_booking_route(self):
+        self.start_database()
         data = {'persons': 4}
         response = self.client.post("/bookings",
                               data=json.dumps(data),
@@ -63,6 +68,7 @@ class RoutesBookingsTests(BaseTestCase):
         self.assert400(response)
 
     def test_post_correct_booking_route(self):
+        self.start_database()
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 1,
@@ -89,6 +95,7 @@ class RoutesBookingsTests(BaseTestCase):
         self.restart_database()
 
     def test_post_error_empty_name(self):
+        self.start_database()
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 'a',
@@ -102,6 +109,7 @@ class RoutesBookingsTests(BaseTestCase):
 
 
     def test_post_error_persons_integer(self):
+        self.start_database()
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 'a',
@@ -126,6 +134,7 @@ class RoutesBookingsTests(BaseTestCase):
         self.assert400(response)
 
     def test_post_error_persons_route(self):
+        self.start_database()
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 24,
@@ -150,6 +159,7 @@ class RoutesBookingsTests(BaseTestCase):
         self.assert400(response)
 
     def test_post_error_date_past(self):
+        self.start_database()
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 1,
@@ -164,6 +174,7 @@ class RoutesBookingsTests(BaseTestCase):
  
 
     def test_post_error_date_format(self):
+        self.start_database()
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         data = {
             'persons': 4,
@@ -199,6 +210,7 @@ class RoutesBookingsTests(BaseTestCase):
         self.assert400(response)
 
     def test_delete_booking_admin(self):
+        self.start_database()
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         response = self.client.delete("/bookings/1", headers=self.headers)
         self.assert200(response)
@@ -209,11 +221,13 @@ class RoutesBookingsTests(BaseTestCase):
 
 
     def test_delete_booking_no_admin(self):
+        self.start_database()
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token('maria','mariapass')}
         response = self.client.delete("/bookings/1", headers=self.headers)
         self.assert403(response)
 
     def test_number_of_bookings(self):
+        self.start_database()
         self.headers = {'Content-Type': 'application/json', 'x-access-token': self.get_token()}
         response = self.client.get("/bookings?date=2018-1-1 14:00", headers=self.headers)
         json_response = json.loads(response.data.decode('utf-8'))
