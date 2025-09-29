@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify
 
 router = Blueprint("restaurant", __name__, url_prefix="/restaurants")
 
-@router.route("/")
+@router.route("")
 def get_restaurants():
     from api.models import Restaurant
     from api.models_schemas import restaurants_schema

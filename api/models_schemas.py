@@ -47,6 +47,7 @@ class BookingSchema(ma.SQLAlchemyAutoSchema):
         model = Booking
         load_instance = True
     creator = ma.Nested(user_schema_only_name)
+    tables = ma.Nested(table_schema, many=True)
 
 booking_schema = BookingSchema()
 bookings_schema = BookingSchema(many=True)

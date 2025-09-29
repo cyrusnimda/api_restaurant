@@ -21,7 +21,7 @@ def create_app(env_object = None):
 
     app = Flask(__name__)
     CORS(app)
-    
+
     app.config.from_object(env_object)
 
     # Load database model
