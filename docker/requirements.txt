@@ -12,3 +12,4 @@ PyMySQL
 gunicorn
 Flask-Migrate
 alembic
+flask_cors
